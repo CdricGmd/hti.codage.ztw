@@ -10,15 +10,15 @@ import testimage.*;
  */
 
 public class Lancer {
-	// test
-  public Lancer() {
-  }
-  public static void main(String[] args) {
-    Lancer lancer1 = new Lancer();
-    TopControl top=new TopControl();
-    menu men = new menu(top,4,4);
-    men.show();
-    top.me=men;
+	// test retest
+	public Lancer() {
+	}
+	public static void main(String[] args) {
+		Lancer lancer1 = new Lancer();
+		TopControl top=new TopControl();
+		menu men = new menu(top,4,4);
+		men.show();
+		top.me=men;
 
-  }
+	}
 }
