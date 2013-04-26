@@ -15,25 +15,25 @@ import java.awt.image.*;
 
 public class ImageIO {
 
-  private Image image;
-  private int width;
-  private int heigth;
+	private Image image;
+	private int width;
+	private int heigth;
 
 
-  public ImageIO() {
-  }
+	public ImageIO() {
+	}
 
-  public Image OuvrirImage(String path){
-  image=Toolkit.getDefaultToolkit().createImage(path);
-  System.out.println(image);
-  return image;
-  }
+	public Image OuvrirImage(String path){
+		image=Toolkit.getDefaultToolkit().createImage(path);
+		System.out.println(image);
+		return image;
+	}
 
-  public int getHeigth(){
-    return this.heigth;
-  }
+	public int getHeigth(){
+		return this.heigth;
+	}
 
-  public int getWidth(){
-    return this.width;
-  }
+	public int getWidth(){
+		return this.width;
+	}
 }

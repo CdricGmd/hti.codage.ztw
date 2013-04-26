@@ -13,33 +13,33 @@ import javax.swing.*;
  */
 
 public class MonPane extends JPanel {
-  BorderLayout borderLayout1 = new BorderLayout();
-  private Toolkit t;
-  private Image i;
+	BorderLayout borderLayout1 = new BorderLayout();
+	private Toolkit t;
+	private Image i;
 
 
-  public MonPane() {
-    try {
-      jbInit();
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-    }
-  }
-  void jbInit() throws Exception {
-    this.setLayout(borderLayout1);
-  }
+	public MonPane() {
+		try {
+			jbInit();
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	void jbInit() throws Exception {
+		this.setLayout(borderLayout1);
+	}
 
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    //unJeu.laBalle.dessineToi(g);
-    }
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		//unJeu.laBalle.dessineToi(g);
+	}
 
 
 
-  public void setImage(Image im){
-    this.i=im;
-  }
+	public void setImage(Image im){
+		this.i=im;
+	}
 
 
 }

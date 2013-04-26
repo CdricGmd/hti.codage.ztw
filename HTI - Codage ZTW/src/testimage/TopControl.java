@@ -10,22 +10,22 @@ package testimage;
  */
 
 public class TopControl {
-  public menu me;
-  String path;
-  String nom;
-  int w;
-  int h;
+	public menu me;
+	String path;
+	String nom;
+	int w;
+	int h;
 
-  public TopControl() {
-  }
+	public TopControl() {
+	}
 
-  public void MAJ(int w,int h){
-    me.dispose();
-    me=new menu(this,w,h);
-    me.show();
-    me.ouvrirIm(path,nom);
-    me.jComboH.setSelectedIndex(h-1);
-    me.jComboW.setSelectedIndex(w-1);
-  }
+	public void MAJ(int w,int h){
+		me.dispose();
+		me=new menu(this,w,h);
+		me.show();
+		me.ouvrirIm(path,nom);
+		me.jComboH.setSelectedIndex(h-1);
+		me.jComboW.setSelectedIndex(w-1);
+	}
 
 }

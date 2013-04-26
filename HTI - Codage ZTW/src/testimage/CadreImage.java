@@ -15,36 +15,36 @@ import java.awt.image.*;
 
 public class CadreImage extends JFrame {
 
-  Dimension d ;
-  int oriX,oriY;
-  String titre;
-  BufferedImage im;
+	Dimension d ;
+	int oriX,oriY;
+	String titre;
+	BufferedImage im;
 
-  public CadreImage(BufferedImage im, String titre) {
-    PlaceFenetres.PlaceFenetre(1.0/3,1.0/3,this);
-    this.im=im;
-    this.titre=titre;
-    this.setBackground(Color.black);
-    this.setResizable(false);
+	public CadreImage(BufferedImage im, String titre) {
+		PlaceFenetres.PlaceFenetre(1.0/3,1.0/3,this);
+		this.im=im;
+		this.titre=titre;
+		this.setBackground(Color.black);
+		this.setResizable(false);
 
-  }
+	}
 
-  public void paint(Graphics g){
-    this.d=this.getSize();
-    this.oriX=70;
-    this.oriY=60;
-    this.setVisible(true);
-    this.setTitle(this.titre);
+	public void paint(Graphics g){
+		this.d=this.getSize();
+		this.oriX=70;
+		this.oriY=60;
+		this.setVisible(true);
+		this.setTitle(this.titre);
 
-    int w = this.im.getWidth()+20;
-    int h =this.im.getHeight()+20;
+		int w = this.im.getWidth()+20;
+		int h =this.im.getHeight()+20;
 
-    //RÈinitialise affichage
-    g.clearRect(0,0,(int)this.getSize().getWidth(),(int)this.getSize().getHeight());
+		//RÈinitialise affichage
+		g.clearRect(0,0,(int)this.getSize().getWidth(),(int)this.getSize().getHeight());
 
-    //Affiche Image
-    g.drawImage(this.im,this.oriX,this.oriY,w,h,null);
+		//Affiche Image
+		g.drawImage(this.im,this.oriX,this.oriY,w,h,null);
 
-    this.setSize(w+140,h+100);
-  }
+		this.setSize(w+140,h+100);
+	}
 }
