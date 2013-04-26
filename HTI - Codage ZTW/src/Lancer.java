@@ -19,6 +19,5 @@ public class Lancer {
 		menu men = new menu(top,4,4);
 		men.show();
 		top.me=men;
-
 	}
 }
