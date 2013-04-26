@@ -18,8 +18,13 @@ import java.util.*;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 public class menu extends JFrame {
-  JPanel jPanel1 = new JPanel();
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4371450938936625837L;
+JPanel jPanel1 = new JPanel();
   JButton jButton1 = new JButton();
 
   ImageIO imIO=new ImageIO();

@@ -10,7 +10,7 @@ import testimage.*;
  */
 
 public class Lancer {
-
+	// test
   public Lancer() {
   }
   public static void main(String[] args) {
