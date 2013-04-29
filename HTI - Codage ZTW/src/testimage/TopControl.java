@@ -27,5 +27,4 @@ public class TopControl {
 		me.jComboH.setSelectedIndex(h-1);
 		me.jComboW.setSelectedIndex(w-1);
 	}
-
 }

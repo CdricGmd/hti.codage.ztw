@@ -13,7 +13,12 @@ import javax.swing.UIManager;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 public class Histogramme extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5595382274373531953L;
 	Dimension d ;
 	int oriX,oriY;
 	String titre;

@@ -13,6 +13,10 @@ import javax.swing.*;
  */
 
 public class MonPane extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1559278546170736784L;
 	BorderLayout borderLayout1 = new BorderLayout();
 	private Toolkit t;
 	private Image i;

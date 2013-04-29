@@ -15,6 +15,10 @@ import java.awt.image.*;
 
 public class CadreImage extends JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1977104241047460485L;
 	Dimension d ;
 	int oriX,oriY;
 	String titre;

@@ -13,6 +13,7 @@ import javax.swing.filechooser.*;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 public class MonFiltre extends FileFilter{
 
 	String []lesSuffixes;

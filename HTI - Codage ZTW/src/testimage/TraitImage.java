@@ -16,6 +16,7 @@ import java.util.*;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 public abstract class TraitImage {
 
 	//Bufferiser une image

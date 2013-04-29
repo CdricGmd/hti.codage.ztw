@@ -16,6 +16,7 @@ import javax.swing.border.*;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 abstract class PlaceFenetres {
 
 

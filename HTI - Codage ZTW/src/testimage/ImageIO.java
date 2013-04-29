@@ -13,6 +13,7 @@ import java.awt.image.*;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 public class ImageIO {
 
 	private Image image;
