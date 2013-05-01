@@ -17,24 +17,29 @@ import java.lang.Math;
 public abstract class CodageZTW {
 
 	/**
-	 * Code binaired'un pixel Zero-Tree Root
+	 * Code binaire d'un pixel Zero-Tree Root
 	 */
 	public final boolean[] ZTR = { false, false };
 
 	/**
-	 * Code binaired'un pixel Zero-Isolated
+	 * Code binaire d'un pixel Zero-Isolated
 	 */
 	public final boolean[] ZI = { true, true };
 
 	/**
-	 * Code binaired'un pixel Positive
+	 * Code binaire d'un pixel Positive
 	 */
 	public final boolean[] P = { false, true };
 
 	/**
-	 * Code binaired'un pixel Negative
+	 * Code binaire d'un pixel Negative
 	 */
 	public final boolean[] N = { true, false };
+	
+	/**
+	 * Code pour un pixel non significatif de classification encore indeterminee
+	 */
+	public final boolean[] NS = { false, false, false };
 
 	/**
 	 * Codage ZTW d'une image transformee.
@@ -130,20 +135,24 @@ public abstract class CodageZTW {
 	 * 
 	 * @param donnee
 	 *            image transformee
+	 * @param classification
+	 *            tableau auxiliaire qui code si un pixel est significatif ou
+	 *            non
 	 * @param seuil
 	 *            valeur de seuil
 	 * 
 	 */
-	private void balayage(double[][] donnee, double seuil) {
+	private void balayage(double[][] donnee, boolean[][][] classification,
+			double seuil) {
 		// Premier pixel
 		int t = 0;
-		rasterscan(donnee, 0, 0, seuil);
+		rasterscan(donnee, classification, 0, 0, seuil);
 		// Balayage iteratif
 		for (int n = 0; n < Math.sqrt(donnee.length); n++) {
 			t = (int) Math.pow(2, n);
-			rasterscan(donnee, 1, t, seuil);
-			rasterscan(donnee, t, 1, seuil);
-			rasterscan(donnee, t, t, seuil);
+			rasterscan(donnee, classification, 1, t, seuil);
+			rasterscan(donnee, classification, t, 1, seuil);
+			rasterscan(donnee, classification, t, t, seuil);
 		}
 	}
 
@@ -152,6 +161,9 @@ public abstract class CodageZTW {
 	 * 
 	 * @param donnee
 	 *            image transformee
+	 * @param classification
+	 *            tableau auxiliaire qui code si un pixel est significatif ou
+	 *            non
 	 * @param i
 	 *            premiere coordonnee du premier pixel de la sous-bande
 	 * @param j
@@ -159,13 +171,24 @@ public abstract class CodageZTW {
 	 * @param seuil
 	 *            valeur de seuil de comparaison
 	 */
-	private void rasterscan(double[][] donnee, int i, int j, double seuil) {
+	private void rasterscan(double[][] donnee, boolean[][][] classification,
+			int i, int j, double seuil) {
 		int taille = Math.max(i, j);
 
 		for (int u = i; u < taille; u++)
 			for (int v = i; v < taille; v++)
-				if (donnee[u][v] < seuil)
-					System.out.println("hello world");
-
+				// Les pixels ZTR ne sont pas balayes
+				if(classification[u][v] == ZTR)
+					continue;
+				else{
+					// Determination de la classification du pixel : singificatif P, N ou non.
+					if (Math.abs(donnee[u][v]) < seuil) {
+						if (donnee[u][v]<0)
+							classification[u][v] = N;
+						else
+							classification[u][v] = P;
+					} else
+						classification[u][v] = NS;
+				}
 	}
 }
