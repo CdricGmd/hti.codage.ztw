@@ -3,37 +3,38 @@ package compression;
 import java.lang.Math;
 
 /**
- * CodageZTW est une classe qui permet d'effectuer un codage/decodage bianire d'une decomposition en ondelettres.
+ * CodageZTW est une classe qui permet d'effectuer un codage/decodage binaire
+ * d'une decomposition en ondelettres.
  * 
  * <p>
- * Codage binaire ZTW d'une decoposition multiresolution en
- * ondelettes. Zero Tree Wavelet Coding.
+ * Codage binaire ZTW d'une decoposition multiresolution en ondelettes. Zero
+ * Tree Wavelet Coding.
  * </p>
  * 
  * @author Cedric Golmard
  * @version 1.0
  */
 public abstract class CodageZTW {
-	
+
 	/**
 	 * Code binaired'un pixel Zero-Tree Root
 	 */
-	public final boolean[] ZTR = {false, false} ;
-	
+	public final boolean[] ZTR = { false, false };
+
 	/**
 	 * Code binaired'un pixel Zero-Isolated
 	 */
-	public final boolean[] ZI = {true, true} ;
-	
+	public final boolean[] ZI = { true, true };
+
 	/**
 	 * Code binaired'un pixel Positive
 	 */
-	public final boolean[] P = {false, true} ;
-	
+	public final boolean[] P = { false, true };
+
 	/**
 	 * Code binaired'un pixel Negative
 	 */
-	public final boolean[] N = {true, false} ;
+	public final boolean[] N = { true, false };
 
 	/**
 	 * Codage ZTW d'une image transformee.
@@ -97,7 +98,7 @@ public abstract class CodageZTW {
 	 * 
 	 * @return valeur de seuil initiale
 	 */
-	 private double seuil(double[][] donnee) {
+	private double seuil(double[][] donnee) {
 		double max_temp = -1;
 		for (int i = 0; i < donnee.length; i++)
 			for (int j = 0; j < donnee[i].length; j++)
@@ -106,8 +107,6 @@ public abstract class CodageZTW {
 		return max_temp / 2;
 	}
 
-	
-
 	/**
 	 * Actualise les coefficients d'un pixel significatif selon son signe
 	 * 
@@ -115,7 +114,7 @@ public abstract class CodageZTW {
 	 *            coefficient du pixel significatif
 	 * @param seuil
 	 *            valeur de seuil
-	 *            
+	 * 
 	 * @return nouvelle valeur du coefficient
 	 */
 	private double actualiseCoeff(double coeff, double seuil) {
@@ -147,7 +146,7 @@ public abstract class CodageZTW {
 			rasterscan(donnee, t, t, seuil);
 		}
 	}
-	
+
 	/**
 	 * Effectue un balayge raster-scan des coefficients d'une sous-bande
 	 * 
