@@ -1,6 +1,9 @@
 package compression;
 
-import java.lang.Math;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * CodageZTW est une classe qui permet d'effectuer un codage/decodage binaire
@@ -17,8 +20,10 @@ import java.lang.Math;
 public abstract class CodageZTW {
 
 	/**
-	 * Code binaire des classes de pixels. Remarque : le premier boolean est
-	 * false si non significatif, true si significatif
+	 * Code binaire des classes de pixels.
+	 * 
+	 * Remarque : le premier boolean est false si non significatif, true si
+	 * significatif
 	 */
 
 	/**
@@ -67,16 +72,71 @@ public abstract class CodageZTW {
 	 *            nom du fichier de stockage du flux binaire
 	 * 
 	 * @return entier informant de la reussite ou non du codage
+	 * @throws IOException
 	 */
 	// condition : niv-resol < sqrt(height)
 	public int ztw_code(double[][] xt, int width, int height, int niv_resol,
-			int size, char[] bitstream_name) {
+			int size, char[] bitstream_name) throws IOException {
 		/**
-		 * Verifications
+		 * Initialisation
 		 */
+		int M = (int) (height / Math.pow(2, niv_resol - 1));
+		int N = (int) (width / Math.pow(2, niv_resol - 1));
+		double T = seuil(xt);
+		boolean[][][] etiquettes = null;
+		int current_size = size + 1;
+		DataOutputStream ecrivain = new DataOutputStream(
+				new BufferedOutputStream(new FileOutputStream(
+						bitstream_name.toString())));
+
+		/**
+		 * Iterations de l'algorithme
+		 */
+		while (current_size > size) {
+			// Sous-bande basses frequences
+			M = (int) (height / Math.pow(2, niv_resol - 1));
+			N = (int) (width / Math.pow(2, niv_resol - 1));
+			for (int i = 0; i < M; i++) {
+				for (int j = 0; j < N; j++) {
+					determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
+							height, width);
+				}
+			}
+
+			// Sous-bande hautes frequences
+			M = (int) (height / Math.pow(2, niv_resol - 1));
+			N = (int) (width / Math.pow(2, niv_resol - 1));
+			while (M <= height && N <= width) {
+				for (int i = 0; i < M; i++)
+					for (int j = N; j < 2 * N; j++) { // Sous-bande 1
+						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
+								height, width);
+					}
+				for (int i = M; i < 2 * M; i++)
+					for (int j = 0; j < N; j++) { // Sous-bande 2
+						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
+								height, width);
+					}
+				for (int i = M; i < 2 * M; i++)
+					for (int j = N; j < 2 * N; j++) { // Sous-bande 3
+						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
+								height, width);
+					}
+				M *= 2;
+				N *= 2;
+			}
+
+			// Actualisation
+			current_size = ecrivain.size();
+			actualiseCoeff(xt, etiquettes, T, height, width);
+			T /= 2;
+		}
+
+		ecrireFichierBinaire(ecrivain, etiquettes);
+
 		//
 		/*
-		 * double T = seuil(xt); boolean[][][] etiquettes = null;
+		 * 
 		 * while(500*bistream.length < size){ balayage(xt, classPixels,
 		 * niv_resol, T); for(int i = 0; i< height / Math.pow(2, niv_resol - 1);
 		 * i++) for(int j=0; j< width / Math.pow(2, niv_resol - 1) ; j++)
@@ -84,6 +144,12 @@ public abstract class CodageZTW {
 		 * updateBitstream(bistream, classPixels, width, height, niv_resol); }
 		 */
 		return 0;
+	}
+
+	private void ecrireFichierBinaire(DataOutputStream ecrivain,
+			boolean[][][] etiquettes) {
+		// TODO Auto-generated method stub
+
 	}
 
 	/**
@@ -146,15 +212,21 @@ public abstract class CodageZTW {
 	 * 
 	 * @return nouvelle valeur du coefficient
 	 */
-	private void actualiseCoeff(double donnee[][], double[][][] etiquettes,
-			int i, int j, double seuil) {
-		if (etiquettes[i][j].equals(P))
-			donnee[i][j] -= seuil / 2;
-		else if (etiquettes[i][j].equals(N))
-			donnee[i][j] += seuil / 2;
+	private void actualiseCoeff(double donnee[][], boolean[][][] etiquettes,
+			double seuil, int height, int width) {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (etiquettes[i][j].equals(P))
+					donnee[i][j] -= seuil / 2;
+				else if (etiquettes[i][j].equals(N))
+					donnee[i][j] += seuil / 2;
+			}
+		}
+
 	}
 
 	/**
+	 * Determne l'etiquette associee au pixel de l'image donnee.
 	 * 
 	 * @param x
 	 * @param etiquettes
@@ -166,7 +238,7 @@ public abstract class CodageZTW {
 	 * @param width
 	 */
 	private void determinerEtiquette(double[][] x, boolean[][][] etiquettes,
-			int i, int j, int seuil, int niv_resol, int height, int width) {
+			int i, int j, double seuil, int niv_resol, int height, int width) {
 
 		if (etiquettes[i][j].length >= 2) { // etiquette deja connue
 			// Rien a faire =)
@@ -271,8 +343,7 @@ public abstract class CodageZTW {
 					height, width);
 		}
 	}
-	
-	
+
 	// FAUX MAIS ON GARDE AU CAS OU.
 	// /**
 	// * Effectue un balayage de l'image transformee selon l'ordre de parcours
