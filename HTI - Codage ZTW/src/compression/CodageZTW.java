@@ -271,6 +271,9 @@ public abstract class CodageZTW {
 					height, width);
 		}
 	}
+	
+	
+	// FAUX MAIS ON GARDE AU CAS OU.
 	// /**
 	// * Effectue un balayage de l'image transformee selon l'ordre de parcours
 	// des
