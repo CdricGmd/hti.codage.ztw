@@ -1,7 +1,11 @@
 package compression;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -84,26 +88,36 @@ public abstract class CodageZTW {
 		int N = (int) (width / Math.pow(2, niv_resol - 1));
 		double T = seuil(xt);
 		boolean[][][] etiquettes = null;
-		int current_size = size + 1;
+		int current_size = 0;
 		DataOutputStream ecrivain = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(
 						bitstream_name.toString())));
-
+		/**
+		 * 
+		 */
+		ecrivain.writeDouble(T);
+		
 		/**
 		 * Iterations de l'algorithme
 		 */
-		while (current_size > size) {
-			// Sous-bande basses frequences
+		while (current_size < size) {
+			/**
+			 *  Sous-bande basses frequences
+			 */
 			M = (int) (height / Math.pow(2, niv_resol - 1));
 			N = (int) (width / Math.pow(2, niv_resol - 1));
 			for (int i = 0; i < M; i++) {
 				for (int j = 0; j < N; j++) {
 					determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 							height, width);
+					ecrivain.writeBoolean(etiquettes[i][j][0]);
+					ecrivain.writeBoolean(etiquettes[i][j][1]);
 				}
 			}
 
-			// Sous-bande hautes frequences
+			/**
+			 *  Sous-bande hautes frequences
+			 */
 			M = (int) (height / Math.pow(2, niv_resol - 1));
 			N = (int) (width / Math.pow(2, niv_resol - 1));
 			while (M <= height && N <= width) {
@@ -111,46 +125,44 @@ public abstract class CodageZTW {
 					for (int j = N; j < 2 * N; j++) { // Sous-bande 1
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
+						ecrivain.writeBoolean(etiquettes[i][j][0]);
+						ecrivain.writeBoolean(etiquettes[i][j][1]);
 					}
 				for (int i = M; i < 2 * M; i++)
 					for (int j = 0; j < N; j++) { // Sous-bande 2
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
+						ecrivain.writeBoolean(etiquettes[i][j][0]);
+						ecrivain.writeBoolean(etiquettes[i][j][1]);
 					}
 				for (int i = M; i < 2 * M; i++)
 					for (int j = N; j < 2 * N; j++) { // Sous-bande 3
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
+						ecrivain.writeBoolean(etiquettes[i][j][0]);
+						ecrivain.writeBoolean(etiquettes[i][j][1]);
 					}
 				M *= 2;
 				N *= 2;
 			}
 
-			// Actualisation
-			current_size = ecrivain.size();
-			actualiseCoeff(xt, etiquettes, T, height, width);
+			/**
+			 *  Actualisation des coefficients de l'image
+			 */
+			current_size = 1000 * ecrivain.size();
 			T /= 2;
+			actualiseCoeff(xt, etiquettes, T, height, width);
+			// Flush : écrit cette partie dans le fichier, au cas ou ça bloque avant on a toujours cette partie de codée.
+			ecrivain.flush();
 		}
-
-		ecrireFichierBinaire(ecrivain, etiquettes);
-
-		//
-		/*
-		 * 
-		 * while(500*bistream.length < size){ balayage(xt, classPixels,
-		 * niv_resol, T); for(int i = 0; i< height / Math.pow(2, niv_resol - 1);
-		 * i++) for(int j=0; j< width / Math.pow(2, niv_resol - 1) ; j++)
-		 * getetiquettes(classPixels, i, j, height, width, niv_resol);
-		 * updateBitstream(bistream, classPixels, width, height, niv_resol); }
+		
+		/**
+		 * Fermeture du fichier et fin.
 		 */
+		ecrivain.close();
 		return 0;
 	}
 
-	private void ecrireFichierBinaire(DataOutputStream ecrivain,
-			boolean[][][] etiquettes) {
-		// TODO Auto-generated method stub
-
-	}
 
 	/**
 	 * Decodage d'un flux binaire ZWTC
@@ -169,12 +181,122 @@ public abstract class CodageZTW {
 	 *            nom du fichier de stockage du flux binaire
 	 * 
 	 * @return entier informant de la reussite ou non du decodage
+	 * @throws IOException 
 	 */
 	public int ztw_decode(double[][] xtrec, int width, int height,
-			int niv_resol, char[] bitstream_name) {
+			int niv_resol, char[] bitstream_name) throws IOException {
+		/**
+		 * 
+		 */
+		boolean[][][] etiquettes = null;
+		boolean[] mon_etiquette = null;
+		byte[] buf = new byte[0];
+		double T = 0;
+		int N, M;
+		for(int i = 0; i < height; i++ )
+			for(int j = 0; j < width; j++ )
+				xtrec[i][j] = 0;
+		/**
+		 * Ouverture du fichier
+		 */
+		DataInputStream dis = null;
+		dis = new DataInputStream(new FileInputStream(new
+				File(bitstream_name.toString())));
+		
+		/**
+		 * Lecture du seuil initial
+		 */
+		T = dis.readDouble();
+		
+		/**
+		 * Iteration
+		 */
+		while(dis.available() > 0) {
+			etiquettes = null;
+			/**
+			 *  Sous-bande basses frequences
+			 */
+			M = (int) (height / Math.pow(2, niv_resol - 1));
+			N = (int) (width / Math.pow(2, niv_resol - 1));
+			for (int i = 0; i < M; i++) {
+				for (int j = 0; j < N; j++) {
+					readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+				}
+			}
+
+			/**
+			 *  Sous-bande hautes frequences
+			 */
+			M = (int) (height / Math.pow(2, niv_resol - 1));
+			N = (int) (width / Math.pow(2, niv_resol - 1));
+			while (M <= height && N <= width) {
+				for (int i = 0; i < M; i++)
+					for (int j = N; j < 2 * N; j++) { // Sous-bande 1
+						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+					}
+				for (int i = M; i < 2 * M; i++)
+					for (int j = 0; j < N; j++) { // Sous-bande 2
+						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+					}
+				for (int i = M; i < 2 * M; i++)
+					for (int j = N; j < 2 * N; j++) { // Sous-bande 3
+						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+					}
+				M *= 2;
+				N *= 2;
+			}
+
+			/**
+			 *  Actualisation des coefficients de l'image
+			 */
+			for(int i = 0; i < height; i++ )
+				for(int j = 0; j < width; j++ )
+					actualiseCoeff(xtrec, etiquettes, T, height, width);
+			/**
+			 * Actualisation du seuil
+			 */
+			T /= 2;
+		}
+		
+		dis.close();
 		return 0;
 	}
-
+	
+	/**
+	 * 
+	 * @param etiquettes
+	 * @param width
+	 * @param height
+	 * @param niv_resol
+	 * @param i
+	 * @param j
+	 * @param dis
+	 * @throws IOException
+	 */
+	void readEtiquetteFromBitstream(boolean[][][] etiquettes, int width, int height, int niv_resol, int i, int j, DataInputStream dis) throws IOException{
+		/**
+		 * Cas 1 : etiquette deja connue
+		 */
+		if(etiquettes[i][j] == NS)
+			return;
+		if(etiquettes[i][j] == P || etiquettes[i][j] == N || etiquettes[i][j] == ZI || etiquettes[i][j] == ZTR)
+			return;
+		
+		/**
+		 * Cas general : lecture de l'etiquette dans le fichier
+		 */
+		etiquettes[i][j][0] = dis.readBoolean();
+		etiquettes[i][j][1] = dis.readBoolean();
+		
+		/**
+		 * Verification de la descendance si ZTR
+		 */
+		if(etiquettes[i][j] == ZTR){
+			marquerDescendantsNS(etiquettes, i, j, niv_resol, height, width);
+		}
+	}
+	
+	
 	/**
 	 * Calcul de la valeur de seuil initiale.
 	 * <p>
@@ -217,9 +339,9 @@ public abstract class CodageZTW {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				if (etiquettes[i][j].equals(P))
-					donnee[i][j] -= seuil / 2;
+					donnee[i][j] -= seuil;
 				else if (etiquettes[i][j].equals(N))
-					donnee[i][j] += seuil / 2;
+					donnee[i][j] += seuil;
 			}
 		}
 
