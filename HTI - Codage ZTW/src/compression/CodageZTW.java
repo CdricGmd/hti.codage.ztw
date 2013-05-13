@@ -1,6 +1,5 @@
 package compression;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -33,27 +32,27 @@ public abstract class CodageZTW {
 	/**
 	 * Code binaire d'un pixel Zero-Tree Root
 	 */
-	public final boolean[] ZTR = { false, false };
+	public final static boolean[] ZTR = { false, false };
 
 	/**
 	 * Code binaire d'un pixel Zero-Isolated
 	 */
-	public final boolean[] ZI = { false, true };
+	public final static boolean[] ZI = { false, true };
 
 	/**
 	 * Code binaire d'un pixel Positive
 	 */
-	public final boolean[] P = { true, true };
+	public final static boolean[] P = { true, true };
 
 	/**
 	 * Code binaire d'un pixel Negative
 	 */
-	public final boolean[] N = { true, false };
+	public final static boolean[] N = { true, false };
 
 	/**
 	 * Code pour un pixel descendant d'un ZTR
 	 */
-	public final boolean[] NS = { false, false, false };
+	public final static boolean[] NS = { false, false, false };
 
 	/**
 	 * Codage ZTW d'une image transformee.
@@ -79,19 +78,19 @@ public abstract class CodageZTW {
 	 * @throws IOException
 	 */
 	// condition : niv-resol < sqrt(height)
-	public int ztw_code(double[][] xt, int width, int height, int niv_resol,
-			int size, char[] bitstream_name) throws IOException {
+	public static int ztw_code(double[][] xt, int width, int height, int niv_resol,
+			int size, String bitstream_name) throws IOException {
 		/**
 		 * Initialisation
 		 */
 		int M = (int) (height / Math.pow(2, niv_resol - 1));
 		int N = (int) (width / Math.pow(2, niv_resol - 1));
 		double T = seuil(xt);
-		boolean[][][] etiquettes = null;
+		boolean[][][] etiquettes = new boolean[height][width][];
 		int current_size = 0;
 		DataOutputStream ecrivain = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(
-						bitstream_name.toString())));
+						bitstream_name)));
 		/**
 		 * 
 		 */
@@ -183,14 +182,12 @@ public abstract class CodageZTW {
 	 * @return entier informant de la reussite ou non du decodage
 	 * @throws IOException 
 	 */
-	public int ztw_decode(double[][] xtrec, int width, int height,
-			int niv_resol, char[] bitstream_name) throws IOException {
+	public static int ztw_decode(double[][] xtrec, int width, int height,
+			int niv_resol, String bitstream_name) throws IOException {
 		/**
 		 * 
 		 */
 		boolean[][][] etiquettes = null;
-		boolean[] mon_etiquette = null;
-		byte[] buf = new byte[0];
 		double T = 0;
 		int N, M;
 		for(int i = 0; i < height; i++ )
@@ -201,7 +198,7 @@ public abstract class CodageZTW {
 		 */
 		DataInputStream dis = null;
 		dis = new DataInputStream(new FileInputStream(new
-				File(bitstream_name.toString())));
+				File(bitstream_name)));
 		
 		/**
 		 * Lecture du seuil initial
@@ -273,7 +270,7 @@ public abstract class CodageZTW {
 	 * @param dis
 	 * @throws IOException
 	 */
-	void readEtiquetteFromBitstream(boolean[][][] etiquettes, int width, int height, int niv_resol, int i, int j, DataInputStream dis) throws IOException{
+	static void readEtiquetteFromBitstream(boolean[][][] etiquettes, int width, int height, int niv_resol, int i, int j, DataInputStream dis) throws IOException{
 		/**
 		 * Cas 1 : etiquette deja connue
 		 */
@@ -309,7 +306,7 @@ public abstract class CodageZTW {
 	 * 
 	 * @return valeur de seuil initiale
 	 */
-	private double seuil(double[][] donnee) {
+	private static double seuil(double[][] donnee) {
 		double max_temp = -1;
 		for (int i = 0; i < donnee.length; i++)
 			for (int j = 0; j < donnee[i].length; j++)
@@ -334,7 +331,7 @@ public abstract class CodageZTW {
 	 * 
 	 * @return nouvelle valeur du coefficient
 	 */
-	private void actualiseCoeff(double donnee[][], boolean[][][] etiquettes,
+	private static void actualiseCoeff(double donnee[][], boolean[][][] etiquettes,
 			double seuil, int height, int width) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
@@ -359,7 +356,7 @@ public abstract class CodageZTW {
 	 * @param height
 	 * @param width
 	 */
-	private void determinerEtiquette(double[][] x, boolean[][][] etiquettes,
+	private static void determinerEtiquette(double[][] x, boolean[][][] etiquettes,
 			int i, int j, double seuil, int niv_resol, int height, int width) {
 
 		if (etiquettes[i][j].length >= 2) { // etiquette deja connue
@@ -430,7 +427,7 @@ public abstract class CodageZTW {
 	 * @param height
 	 * @param width
 	 */
-	private void marquerDescendantsNS(boolean[][][] etiquettes, int i, int j,
+	private static void marquerDescendantsNS(boolean[][][] etiquettes, int i, int j,
 			int niv_resol, int height, int width) {
 		if (i >= height | j >= width) // Critere d'arret bords de l'image
 			return;
