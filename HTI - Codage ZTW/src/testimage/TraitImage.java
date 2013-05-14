@@ -553,5 +553,151 @@ public static double[] getV(double[][] r){
 	  	System.out.print(coeff[i][j]+" ");
 	}*/
 	}
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public static void haar1D(double[] x, double [] y)
+	{
+		int N = x.length; int N2 = N>>1; 
+		for(int i=0;i<N2;i++)
+			{
+				y[i] = (x[2*i]+x[2*i+1])/2;
+				y[i+N2] = (x[2*i]-x[2*i+1])/2;
+			}
+	}
+	
+	public static void haar1D_inv(double[] x, double [] x_rec)
+	{
+		int N = x.length; int N2 = N>>1; 
+		for(int i=0;i<N2;i++)
+			{
+				x_rec[2*i] = x[i] + x[i+N2];
+				x_rec[2*i+1] = x[i] - x[i+N2];
+			}
+	}
+	/**
+	 *  
+	 * @param x
+	 * @param y
+	 */
+	public static void haar2D_mono(double[][] x, double[][] y)
+	{
+		int h = x.length;
+		int w = x[0].length; 
+		int W2 = w>>1;
+		int N2 = h>>1; 
+		double [][]z = new double[h][w]; 
+		//Lignes
+		for(int i=0; i<h; i++)
+			for(int j=0;j<N2;j++)
+			{
+				z[i][j] = (x[i][2*j]+x[i][2*j+1])/2;
+				z[i][j+N2] = (x[i][2*j]-x[i][2*j+1])/2;
+			}
+		//Colonnes
+		for(int j=0; j<w;j++)
+			for(int i=0;i<W2;i++)
+			{
+				y[i][j] = (z[2*i][j]+z[2*i+1][j])/2;
+				y[i+W2][j] = (z[2*i][j]-z[2*i+1][j])/2;
+			}
+	}
+	/**
+	 * 
+	 * @param x
+	 * @param x_rec
+	 */
+	public static void haar2D_mono_inv(double[][] x, double[][] x_rec)
+	{
+		int h = x.length;
+		int w = x[0].length; 
+		int W2 = w>>1;
+		int N2 = h>>1; 
+		double [][]z = new double[h][w]; 
+		//Lignes
+		for(int i=0; i<h; i++)
+			for(int j=0;j<N2;j++)
+			{
+				z[i][2*j] = x[i][j] + x[i][j+N2];
+				z[i][2*j+1] = x[i][j] - x[i][j+N2];
+			}
+		//Colonnes
+		for(int j=0; j<w;j++)
+			for(int i=0;i<W2;i++)
+			{
+				x_rec[2*i][j] = z[i][j] + z[i+N2][j];
+				x_rec[2*i+1][j] = z[i][j] - z[i+N2][j];
+
+			}
+	}
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @param niv_resol
+	 */
+	public static void haar2D_multi(double[][] x, double [][] y, int niv_resol)
+	{
+		int h = x.length;
+		int w = x[0].length;
+		for (int i = 0; i < h; i++)
+			for (int j = 0; j < w; j++) {
+				y[i][j] = x[i][j];
+			}
+		
+		for(int n=0; n<niv_resol; n++){
+			int MM = (int) (h / Math.pow(2, n));
+			int NN = (int) (w / Math.pow(2, n));
+			
+			double[][] z = new double[MM][NN];
+			double[][] z_res = new double[MM][NN];
+			for (int i = 0; i < MM; i++) {
+				for (int j = 0; j < NN; j++) {
+					z[i][j] = y[i][j];
+				}
+			}
+			haar2D_mono(z,z_res );
+			for (int i = 0; i < MM; i++)
+				for (int j = 0; j < NN; j++) {
+					y[i][j] = z_res[i][j];
+				}
+		}	
+	}
+	/**
+	 * 
+	 * @param x
+	 * @param x_rec
+	 * @param niv_resol
+	 */
+	public static void haar2D_multi_inv(double[][] x, double [][] x_rec, int niv_resol)
+	{
+		int h = x.length;
+		int w = x[0].length;
+		for (int i = 0; i < h; i++)
+			for (int j = 0; j < w; j++) {
+				x_rec[i][j] = x[i][j];
+			}
+		
+		for(int n=niv_resol-1; n>-1; n--){
+			int MM = (int) (h / Math.pow(2, n));
+			int NN = (int) (w / Math.pow(2, n));
+			
+			double[][] z = new double[MM][NN];
+			double[][] z_res = new double[MM][NN];
+			for (int i = 0; i < MM; i++) {
+				for (int j = 0; j < NN; j++) {
+					z[i][j] = x_rec[i][j];
+				}
+			}
+			haar2D_mono_inv(z,z_res );
+			for (int i = 0; i < MM; i++)
+				for (int j = 0; j < NN; j++) {
+					x_rec[i][j] = z_res[i][j];
+				}
+		}	
+	}
+	
 
 }

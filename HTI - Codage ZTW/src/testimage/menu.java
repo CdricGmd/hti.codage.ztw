@@ -28,10 +28,6 @@ import javax.swing.border.TitledBorder;
 
 import compression.CodageZTW;
 
-import math.jwave.*;
-import math.jwave.transforms.*;
-import math.jwave.transforms.wavelets.*;
-
 
 
 /**
@@ -67,7 +63,7 @@ public class menu extends JFrame {
 	double erreurEntrop = 0;
 	Histogramme histoGraphOri = new Histogramme(oriHisto,"originale",Color.blue,oriEntrop);
 	Histogramme histoGraphModif = new Histogramme(modifHisto,"modifiee",Color.red,modifEntrop);
-	Histogramme histoGraphErreur = new Histogramme(erreurHisto,"Erreure prediction",Color.green,erreurEntrop);
+	Histogramme histoGraphErreur = new Histogramme(erreurHisto,"Erreur prediction",Color.green,erreurEntrop);
 
 	private Image imageOri;
 	private BufferedImage bufIm;
@@ -75,7 +71,7 @@ public class menu extends JFrame {
 	private BufferedImage erreurIm;
 	CadreImage oriCadre = new CadreImage(bufIm,"Image originale");
 	CadreImage modifCadre = new CadreImage(modifIm,"Image modifiee");
-	CadreImage erreurCadre = new CadreImage(modifIm,"Erreure de prediction");
+	CadreImage erreurCadre = new CadreImage(modifIm,"Erreur de prediction");
 	TopControl parent;
 	int Fw;
 	int Fh;
@@ -722,11 +718,17 @@ public class menu extends JFrame {
 			/**
 			 * Transformee
 			 */
-			Transform t = new Transform( new FastWaveletTransform( new Haar02Orthogonal( ) ) );
+			/*
+			Transform t = new Transform( new FastWaveletTransform( new Haar02( )) );
 			erreur = t.forward( donnee );
+			*/
+			int niv_resolution = 8;
+			int required_size = 130;
+			TraitImage.haar2D_multi(donnee, erreur, niv_resolution);
+			
 			
 			try {
-				CodageZTW.ztw_code(erreur, 512, 512, 7, 250, "image_codee.bitstream");
+				CodageZTW.ztw_code(erreur, 512, 512, niv_resolution, required_size, nomOri + ".bitstream");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -737,7 +739,10 @@ public class menu extends JFrame {
 			 * Transformee inverse
 			 */
 			double[][] x_rec = new double[donnee.length][donnee[0].length];
+			TraitImage.haar2D_multi_inv(erreur,x_rec, niv_resolution);
+			/*
 			x_rec = t.reverse( erreur );
+			*/
 			
 			//System.out.println("Calcul restitution");
 			//TraitImage.predictionAR2d_inv(erreur,x_rec, coeff, Integer.parseInt(Tvalue.getText()),moyenne);
@@ -833,7 +838,7 @@ public class menu extends JFrame {
 		if(this.erreurName.getText().length()!=0)
 		{
 			histoGraphErreur.dispose();
-			histoGraphErreur = new Histogramme(erreurHisto,"erreure",Color.green,erreurEntrop);
+			histoGraphErreur = new Histogramme(erreurHisto,"erreur",Color.green,erreurEntrop);
 
 			double delta= histoGraphErreur.getSize().getWidth()/2;
 			this.erreurHisto= TraitImage.calculHisto(erreurIm);
@@ -863,7 +868,7 @@ public class menu extends JFrame {
 		if(this.erreurName.getText().length()>0)
 		{
 			erreurCadre.setName("erreurCadre");
-			afficherIm(erreurIm,erreurCadre,"Erreure prediction : "+this.erreurName.getText());
+			afficherIm(erreurIm,erreurCadre,"Erreur prediction : "+this.erreurName.getText());
 		}
 
 	}
