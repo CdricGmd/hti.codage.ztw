@@ -1,11 +1,36 @@
 package testimage;
 
-import java.awt.*;
-import java.awt.image.*;
-import javax.swing.*;
-import java.awt.event.*;
-import javax.swing.border.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
+
+import compression.CodageZTW;
+
+import math.jwave.*;
+import math.jwave.transforms.*;
+import math.jwave.transforms.wavelets.*;
 
 
 
@@ -676,11 +701,11 @@ public class menu extends JFrame {
 
 			//System.out.println("Debut traitement");
 			//System.out.println("Centrage de l'image");
-			double moyenne = TraitImage.calculMoyenne(Iori);
-			double[][] donnee = TraitImage.centrageImage(Iori,moyenne);
+			//double moyenne = TraitImage.calculMoyenne(Iori);
+			double[][] donnee = TraitImage.centrageImage(Iori,0);
 			//System.out.println("Moyenne ="+moyenne);
 
-			TraitImage.getCoeff(donnee,coeff);
+			//TraitImage.getCoeff(donnee,coeff);
 
 			//System.out.println("Reservation memoire y="+donnee.length+" x="+donnee[0].length);
 			double[][] erreur = new double[donnee.length][donnee[0].length];
@@ -692,13 +717,30 @@ public class menu extends JFrame {
 					System.out.println("coeff "+coeff[i][j]);
 			//		coeff[0][0] = 0.0; 	coeff[0][1] = 0.5; 	coeff[1][0] = 0.5; 
 			/* FIN MODIF TITUS */
-
-			TraitImage.predictionAR2d(donnee,erreur, coeff, Integer.parseInt(Tvalue.getText()));
-
+			
+			//TraitImage.predictionAR2d(donnee,erreur, coeff, Integer.parseInt(Tvalue.getText()));
+			/**
+			 * Transformee
+			 */
+			Transform t = new Transform( new FastWaveletTransform( new Haar02Orthogonal( ) ) );
+			erreur = t.forward( donnee );
+			
+			try {
+				CodageZTW.ztw_code(erreur, 512, 512, 7, 250, "image_codee.bitstream");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			//System.out.println("Reservation memoire");
+			/**
+			 * Transformee inverse
+			 */
 			double[][] x_rec = new double[donnee.length][donnee[0].length];
+			x_rec = t.reverse( erreur );
+			
 			//System.out.println("Calcul restitution");
-			TraitImage.predictionAR2d_inv(erreur,x_rec, coeff, Integer.parseInt(Tvalue.getText()),moyenne);
+			//TraitImage.predictionAR2d_inv(erreur,x_rec, coeff, Integer.parseInt(Tvalue.getText()),moyenne);
 			//System.out.println("Changement de format");
 			modifIm = TraitImage.setPixelTab(x_rec);
 			//System.out.println("Fin traitement");

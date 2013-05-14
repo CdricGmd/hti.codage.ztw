@@ -20,7 +20,7 @@ import java.util.*;
 public abstract class TraitImage {
 
 	//Bufferiser une image
-	static BufferedImage toBufferedImage(Image image) {
+	public static BufferedImage toBufferedImage(Image image) {
 		/* On test si l'image n'est pas deja une instance de BufferedImage */
 		if( image instanceof BufferedImage ){
 			/* cool, rien a faire */

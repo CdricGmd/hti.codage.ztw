@@ -17,7 +17,7 @@ import java.io.IOException;
  * Tree Wavelet Coding.
  * </p>
  * 
- * @author Cedric Golmard
+ * @author Cedric Golmard, Ghizlane Aroussi
  * @version 1.0
  */
 public abstract class CodageZTW {
@@ -32,22 +32,22 @@ public abstract class CodageZTW {
 	/**
 	 * Code binaire d'un pixel Zero-Tree Root
 	 */
-	public final static boolean[] ZTR = { false, false };
+	public final static boolean[] ZTR = { false, false, true };
 
 	/**
 	 * Code binaire d'un pixel Zero-Isolated
 	 */
-	public final static boolean[] ZI = { false, true };
+	public final static boolean[] ZI = { false, true, true };
 
 	/**
 	 * Code binaire d'un pixel Positive
 	 */
-	public final static boolean[] P = { true, true };
+	public final static boolean[] P = { true, true, true };
 
 	/**
 	 * Code binaire d'un pixel Negative
 	 */
-	public final static boolean[] N = { true, false };
+	public final static boolean[] N = { true, false, true };
 
 	/**
 	 * Code pour un pixel descendant d'un ZTR
@@ -78,90 +78,113 @@ public abstract class CodageZTW {
 	 * @throws IOException
 	 */
 	// condition : niv-resol < sqrt(height)
-	public static int ztw_code(double[][] xt, int width, int height, int niv_resol,
-			int size, String bitstream_name) throws IOException {
+	public static int ztw_code(double[][] xt, int width, int height,
+			int niv_resol, int size, String bitstream_name) throws IOException {
 		/**
 		 * Initialisation
 		 */
-		int M = (int) (height / Math.pow(2, niv_resol - 1));
-		int N = (int) (width / Math.pow(2, niv_resol - 1));
-		double T = seuil(xt);
-		boolean[][][] etiquettes = new boolean[height][width][];
+		int MM = (int) (height / Math.pow(2, niv_resol - 1));
+		int NN = (int) (width / Math.pow(2, niv_resol - 1));
 		int current_size = 0;
+		double T = seuil(xt);
+
+		boolean[][][] etiquettes = new boolean[height][width][3];
+		boolean[] vrai = { true, true, true };
+		for (int i = 0; i < height; i++)
+			for (int j = 0; j < width; j++)
+				affecter(etiquettes, vrai, i, j);
+
 		DataOutputStream ecrivain = new DataOutputStream(
-				new BufferedOutputStream(new FileOutputStream(
-						bitstream_name)));
+				new BufferedOutputStream(new FileOutputStream(bitstream_name)));
+
+		System.out.println("[CodageZTX] : codage de l'image dans '"
+				+ bitstream_name + "'... ");
+		System.out.println("[CodageZTX] : taille demandee " + size + " kbit. ");
+		System.out.println("[CodageZTX] : seuil = " + T);
+
 		/**
-		 * 
+		 * Ecriture du seuil initial
 		 */
 		ecrivain.writeDouble(T);
-		
+
 		/**
 		 * Iterations de l'algorithme
 		 */
-		while (current_size < size) {
+		while (current_size < (size * 1000)) {
 			/**
-			 *  Sous-bande basses frequences
+			 * Sous-bande basses frequences
 			 */
-			M = (int) (height / Math.pow(2, niv_resol - 1));
-			N = (int) (width / Math.pow(2, niv_resol - 1));
-			for (int i = 0; i < M; i++) {
-				for (int j = 0; j < N; j++) {
+			MM = (int) (height / Math.pow(2, niv_resol - 1));
+			NN = (int) (width / Math.pow(2, niv_resol - 1));
+			for (int i = 0; i < MM; i++) {
+				for (int j = 0; j < NN; j++) {
 					determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 							height, width);
-					ecrivain.writeBoolean(etiquettes[i][j][0]);
-					ecrivain.writeBoolean(etiquettes[i][j][1]);
+					if (etiquettes[i][j] != NS)
+						// for (int t = 0; t < etiquettes[i][j].length; t++)
+						// ecrivain.writeBoolean(etiquettes[i][j][t]);
+						ecrireEtiquette(etiquettes, i, j, ecrivain);
 				}
 			}
 
 			/**
-			 *  Sous-bande hautes frequences
+			 * Sous-bande hautes frequences
 			 */
-			M = (int) (height / Math.pow(2, niv_resol - 1));
-			N = (int) (width / Math.pow(2, niv_resol - 1));
-			while (M <= height && N <= width) {
-				for (int i = 0; i < M; i++)
-					for (int j = N; j < 2 * N; j++) { // Sous-bande 1
+			MM = (int) (height / Math.pow(2, niv_resol - 1));
+			NN = (int) (width / Math.pow(2, niv_resol - 1));
+			while (MM < height && NN < width) {
+				for (int i = 0; i < MM; i++)
+					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 1
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
-						ecrivain.writeBoolean(etiquettes[i][j][0]);
-						ecrivain.writeBoolean(etiquettes[i][j][1]);
+						if (etiquettes[i][j] != NS)
+							// for (int t = 0; t < etiquettes[i][j].length; t++)
+							// ecrivain.writeBoolean(etiquettes[i][j][t]);
+							ecrireEtiquette(etiquettes, i, j, ecrivain);
 					}
-				for (int i = M; i < 2 * M; i++)
-					for (int j = 0; j < N; j++) { // Sous-bande 2
+				for (int i = MM; i < 2 * MM; i++)
+					for (int j = 0; j < NN; j++) { // Sous-bande 2
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
-						ecrivain.writeBoolean(etiquettes[i][j][0]);
-						ecrivain.writeBoolean(etiquettes[i][j][1]);
+						if (etiquettes[i][j] != NS)
+							// for (int t = 0; t < etiquettes[i][j].length; t++)
+							// ecrivain.writeBoolean(etiquettes[i][j][t]);
+							ecrireEtiquette(etiquettes, i, j, ecrivain);
 					}
-				for (int i = M; i < 2 * M; i++)
-					for (int j = N; j < 2 * N; j++) { // Sous-bande 3
+				for (int i = MM; i < 2 * MM; i++)
+					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 3
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
-						ecrivain.writeBoolean(etiquettes[i][j][0]);
-						ecrivain.writeBoolean(etiquettes[i][j][1]);
+						if (etiquettes[i][j] != NS)
+							// for (int t = 0; t < etiquettes[i][j].length; t++)
+							// ecrivain.writeBoolean(etiquettes[i][j][t]);
+							ecrireEtiquette(etiquettes, i, j, ecrivain);
 					}
-				M *= 2;
-				N *= 2;
+				MM *= 2;
+				NN *= 2;
 			}
-
 			/**
-			 *  Actualisation des coefficients de l'image
+			 * Actualisation des coefficients de l'image
 			 */
-			current_size = 1000 * ecrivain.size();
+			current_size = ecrivain.size();
 			T /= 2;
 			actualiseCoeff(xt, etiquettes, T, height, width);
-			// Flush : écrit cette partie dans le fichier, au cas ou ça bloque avant on a toujours cette partie de codée.
+			// Flush : écrit cette partie dans le fichier, au cas ou ça bloque
+			// avant on a toujours cette partie de codée.
 			ecrivain.flush();
+			System.out.println("[CodageZTX] : taille du fichier "
+					+ (current_size / 1000) + " kbit. ");
 		}
-		
+
 		/**
 		 * Fermeture du fichier et fin.
 		 */
+
+		System.out.println("[CodageZTX] : fin du codage de l'image dans '"
+				+ bitstream_name + "'. ");
 		ecrivain.close();
 		return 0;
 	}
-
 
 	/**
 	 * Decodage d'un flux binaire ZWTC
@@ -180,85 +203,106 @@ public abstract class CodageZTW {
 	 *            nom du fichier de stockage du flux binaire
 	 * 
 	 * @return entier informant de la reussite ou non du decodage
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static int ztw_decode(double[][] xtrec, int width, int height,
 			int niv_resol, String bitstream_name) throws IOException {
 		/**
 		 * 
 		 */
-		boolean[][][] etiquettes = null;
+		boolean[][][] etiquettes = new boolean[height][width][3];
+		boolean[] vrai = { true, true, true };
 		double T = 0;
-		int N, M;
-		for(int i = 0; i < height; i++ )
-			for(int j = 0; j < width; j++ )
+		int NN = 0, MM = 0;
+		assert (xtrec.length == height && xtrec[0].length == width);
+		for (int i = 0; i < height; i++)
+			for (int j = 0; j < width; j++)
 				xtrec[i][j] = 0;
 		/**
 		 * Ouverture du fichier
 		 */
 		DataInputStream dis = null;
-		dis = new DataInputStream(new FileInputStream(new
-				File(bitstream_name)));
-		
+		dis = new DataInputStream(new FileInputStream(new File(bitstream_name)));
+
+		System.out.println("[CodageZTX] : decodage de l'image dans '"
+				+ bitstream_name + "'... ");
+
 		/**
 		 * Lecture du seuil initial
 		 */
 		T = dis.readDouble();
-		
 		/**
 		 * Iteration
 		 */
-		while(dis.available() > 0) {
-			etiquettes = null;
+		while (dis.available() > 0) {
+			System.out.println("[CodageZTX] : seuil = " + T);
+			System.out.println("[CodageZTX] : reste " + dis.available() / 1000
+					+ " kbit a decoder.");
+			etiquettes = new boolean[height][width][3];
+			for (int i = 0; i < height; i++)
+				for (int j = 0; j < width; j++) {
+					affecter(etiquettes, vrai, i, j);
+				}
 			/**
-			 *  Sous-bande basses frequences
+			 * Sous-bande basses frequences
 			 */
-			M = (int) (height / Math.pow(2, niv_resol - 1));
-			N = (int) (width / Math.pow(2, niv_resol - 1));
-			for (int i = 0; i < M; i++) {
-				for (int j = 0; j < N; j++) {
-					readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+			System.out.println("[CodageZTX] : debug = LF");
+			MM = (int) (height / Math.pow(2, niv_resol - 1));
+			NN = (int) (width / Math.pow(2, niv_resol - 1));
+			for (int i = 0; i < MM; i++) {
+				for (int j = 0; j < NN; j++) {
+					readEtiquetteFromBitstream(etiquettes, width, height,
+							niv_resol, i, j, dis);
 				}
 			}
-
 			/**
-			 *  Sous-bande hautes frequences
+			 * Sous-bande hautes frequences
 			 */
-			M = (int) (height / Math.pow(2, niv_resol - 1));
-			N = (int) (width / Math.pow(2, niv_resol - 1));
-			while (M <= height && N <= width) {
-				for (int i = 0; i < M; i++)
-					for (int j = N; j < 2 * N; j++) { // Sous-bande 1
-						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+			MM = (int) (height / Math.pow(2, niv_resol - 1));
+			NN = (int) (width / Math.pow(2, niv_resol - 1));
+			while (MM < height && NN < width) {
+				System.out.println("[CodageZTX] : debug = HF1");
+				for (int i = 0; i < MM; i++)
+					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 1
+						readEtiquetteFromBitstream(etiquettes, width, height,
+								niv_resol, i, j, dis);
 					}
-				for (int i = M; i < 2 * M; i++)
-					for (int j = 0; j < N; j++) { // Sous-bande 2
-						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+				System.out.println("[CodageZTX] : debug = HF2");
+				for (int i = MM; i < 2 * MM; i++)
+					for (int j = 0; j < NN; j++) { // Sous-bande 2
+						readEtiquetteFromBitstream(etiquettes, width, height,
+								niv_resol, i, j, dis);
 					}
-				for (int i = M; i < 2 * M; i++)
-					for (int j = N; j < 2 * N; j++) { // Sous-bande 3
-						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
+				System.out.println("[CodageZTX] : debug = HF3");
+				for (int i = MM; i < 2 * MM; i++)
+					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 3
+						readEtiquetteFromBitstream(etiquettes, width, height,
+								niv_resol, i, j, dis);
 					}
-				M *= 2;
-				N *= 2;
+				MM *= 2;
+				NN *= 2;
 			}
-
 			/**
-			 *  Actualisation des coefficients de l'image
+			 * Actualisation des coefficients de l'image
 			 */
-			for(int i = 0; i < height; i++ )
-				for(int j = 0; j < width; j++ )
+			System.out.println("[CodageZTX] : debug = coefs");
+			for (int i = 0; i < height; i++)
+				for (int j = 0; j < width; j++) {
 					actualiseCoeff(xtrec, etiquettes, T, height, width);
+				}
 			/**
 			 * Actualisation du seuil
 			 */
+			System.out.println("[CodageZTX] : debug = seuil");
 			T /= 2;
 		}
-		
+
 		dis.close();
+		System.out.println("[CodageZTX] : fin du decodage de l'image dans '"
+				+ bitstream_name + "'... ");
 		return 0;
 	}
-	
+
 	/**
 	 * 
 	 * @param etiquettes
@@ -270,30 +314,30 @@ public abstract class CodageZTW {
 	 * @param dis
 	 * @throws IOException
 	 */
-	static void readEtiquetteFromBitstream(boolean[][][] etiquettes, int width, int height, int niv_resol, int i, int j, DataInputStream dis) throws IOException{
+	static void readEtiquetteFromBitstream(boolean[][][] etiquettes, int width,
+			int height, int niv_resol, int i, int j, DataInputStream dis)
+			throws IOException {
 		/**
-		 * Cas 1 : etiquette deja connue
+		 * Cas 1 : etiquette NS, descendant de ZTR
 		 */
-		if(etiquettes[i][j] == NS)
+		if (etiquettes[i][j] == NS) {
 			return;
-		if(etiquettes[i][j] == P || etiquettes[i][j] == N || etiquettes[i][j] == ZI || etiquettes[i][j] == ZTR)
-			return;
-		
+		}
 		/**
 		 * Cas general : lecture de l'etiquette dans le fichier
 		 */
-		etiquettes[i][j][0] = dis.readBoolean();
-		etiquettes[i][j][1] = dis.readBoolean();
-		
+		boolean[] etiq = { dis.readBoolean(), dis.readBoolean(),
+				dis.readBoolean() };
+		affecter(etiquettes, etiq, i, j);
+
 		/**
 		 * Verification de la descendance si ZTR
 		 */
-		if(etiquettes[i][j] == ZTR){
+		if (etiquettes[i][j] == ZTR) {
 			marquerDescendantsNS(etiquettes, i, j, niv_resol, height, width);
 		}
 	}
-	
-	
+
 	/**
 	 * Calcul de la valeur de seuil initiale.
 	 * <p>
@@ -331,17 +375,16 @@ public abstract class CodageZTW {
 	 * 
 	 * @return nouvelle valeur du coefficient
 	 */
-	private static void actualiseCoeff(double donnee[][], boolean[][][] etiquettes,
-			double seuil, int height, int width) {
+	private static void actualiseCoeff(double donnee[][],
+			boolean[][][] etiquettes, double seuil, int height, int width) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				if (etiquettes[i][j].equals(P))
+				if (etiquettes[i][j] == P)
 					donnee[i][j] -= seuil;
-				else if (etiquettes[i][j].equals(N))
+				else if (etiquettes[i][j] == N)
 					donnee[i][j] += seuil;
 			}
 		}
-
 	}
 
 	/**
@@ -356,40 +399,83 @@ public abstract class CodageZTW {
 	 * @param height
 	 * @param width
 	 */
-	private static void determinerEtiquette(double[][] x, boolean[][][] etiquettes,
-			int i, int j, double seuil, int niv_resol, int height, int width) {
+	private static void determinerEtiquette(double[][] x,
+			boolean[][][] etiquettes, int i, int j, double seuil,
+			int niv_resol, int height, int width) {
+		
+		/**
+		 * Extremites depassees
+		 */
+		if ((i >= height) || (j >= width))
+			return;
+		//System.out.println("Debug - PS value = " + x[i][j]);
 
-		if (etiquettes[i][j].length >= 2) { // etiquette deja connue
+		/**
+		 * Etiquette deja connue
+		 */
+		if (etiquettes[i][j] != null
+				&& ((etiquettes[i][j] == NS) || (etiquettes[i][j] == N)
+						|| (etiquettes[i][j] == P) || (etiquettes[i][j] == ZI) || (etiquettes[i][j] == ZTR))) {
 			// Rien a faire =)
-		} else if (Math.abs(x[i][j]) > seuil) { // pixel significatif
+		}
+
+		/**
+		 * Pixel significatif
+		 */
+		else if (Math.abs(x[i][j]) > seuil) {
 			if (x[i][j] >= 0) {
-				etiquettes[i][j] = P;
+				affecter(etiquettes, P, i, j);
 			} else {
-				etiquettes[i][j] = N;
+				affecter(etiquettes, N, i, j);
 			}
-		} else { // pixel non-significatif
-			int M = (int) (height / Math.pow(2, niv_resol - 1));
-			int N = (int) (width / Math.pow(2, niv_resol - 1));
-			if ((i < M) | (j < N)) { // sous-bande basse frequence
+		}
+
+		/**
+		 * Pixel non-significatif
+		 */
+		else {
+			int MM = (int) (height / Math.pow(2, niv_resol - 1));
+			int NN = (int) (width / Math.pow(2, niv_resol - 1));
+			/**
+			 * Sous-bande basse frequence
+			 */
+			if ((i < MM) && (j < NN)) {
 				// Appel recursif
-				determinerEtiquette(x, etiquettes, i, j + N, seuil, niv_resol,
+				determinerEtiquette(x, etiquettes, i, j + NN, seuil, niv_resol,
 						height, width);
-				determinerEtiquette(x, etiquettes, i + M, j, seuil, niv_resol,
+				determinerEtiquette(x, etiquettes, i + MM, j, seuil, niv_resol,
 						height, width);
-				determinerEtiquette(x, etiquettes, i + M, j + N, seuil,
+				determinerEtiquette(x, etiquettes, i + MM, j + NN, seuil,
 						niv_resol, height, width);
 
 				// Comparaison
-				if (etiquettes[i][j + N][0] == true
-						| etiquettes[i][j + N][0] == true
-						| etiquettes[i][j + N][0] == true) { // Pixel ZI
-					etiquettes[i][j] = ZI;
-				} else {
-					etiquettes[i][j] = ZTR;
+				/**
+				 * Extremite
+				 */
+				if ((i + MM >= height) || (j + NN >= width)){
+					affecter(etiquettes, ZTR, i, j);
+				}
+				/**
+				 * Pixel ZI
+				 */
+				else if (etiquettes[i][j + NN][0] == true
+						| etiquettes[i + MM][j][0] == true
+						| etiquettes[i + MM][j + NN][0] == true) {
+					affecter(etiquettes, ZI, i, j);
+				}
+				/**
+				 * Pixel ZTR
+				 */
+				else {
+					affecter(etiquettes, ZTR, i, j);
 					marquerDescendantsNS(etiquettes, i, j, niv_resol, height,
 							width);
 				}
-			} else { // sous-bande haute frequence
+			}
+			/**
+			 * Sous-bande haute frequence
+			 */
+			else {
 				// Appel recursif
 				determinerEtiquette(x, etiquettes, 2 * i, 2 * j, seuil,
 						niv_resol, height, width);
@@ -401,20 +487,31 @@ public abstract class CodageZTW {
 						niv_resol, height, width);
 
 				// Comparaison
-				if (etiquettes[2 * i][2 * j][0] == true
+				/**
+				 * Extremite
+				 */
+				if ((2 * i + 1 >= height) || (2 * j + 1 >= width)) {
+					affecter(etiquettes, ZTR, i, j);
+				}
+				/**
+				 * Pixel ZI
+				 */
+				else if (etiquettes[2 * i][2 * j][0] == true
 						| etiquettes[2 * i + 1][2 * j][0] == true
 						| etiquettes[2 * i][2 * j + 1][0] == true
-						| etiquettes[2 * i + 1][2 * j + 1][0] == true) { // Pixel
-																			// ZI
-					etiquettes[i][j] = ZI;
-				} else {
-					etiquettes[i][j] = ZTR;
+						| etiquettes[2 * i + 1][2 * j + 1][0] == true) {
+					affecter(etiquettes, ZI, i, j);
+				}
+				/**
+				 * Pixel ZTR
+				 */
+				else {
+					affecter(etiquettes, ZTR, i, j);
 					marquerDescendantsNS(etiquettes, i, j, niv_resol, height,
 							width);
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -427,40 +524,101 @@ public abstract class CodageZTW {
 	 * @param height
 	 * @param width
 	 */
-	private static void marquerDescendantsNS(boolean[][][] etiquettes, int i, int j,
-			int niv_resol, int height, int width) {
-		if (i >= height | j >= width) // Critere d'arret bords de l'image
+	private static void marquerDescendantsNS(boolean[][][] etiquettes, int i,
+			int j, int niv_resol, int height, int width) {
+		/**
+		 * Critere d'arret bords de l'image
+		 */
+		if ((i >= height) || (j >= width))
 			return;
-		int M = (int) (height / Math.pow(2, niv_resol - 1));
-		int N = (int) (width / Math.pow(2, niv_resol - 1));
-		if ((i < M) | (j < N)) { // sous-bande basse frequence
-			// Etiquetage en ZNS des descendants directs
-			etiquettes[i + M][j] = NS;
-			etiquettes[i][j + N] = NS;
-			etiquettes[i + M][j + N] = NS;
+		int MM = (int) (height / Math.pow(2, niv_resol - 1));
+		int NN = (int) (width / Math.pow(2, niv_resol - 1));
+		/**
+		 * Sous-bande basse frequence
+		 */
+		if ((i < MM) | (j < NN)) {
+			if ((i + MM >= height) || (j + NN >= width))
+				return;
+			else {
+				// Etiquetage en ZNS des descendants directs
+				affecter(etiquettes, NS, i + MM, j);
+				affecter(etiquettes, NS, i, j + NN);
+				affecter(etiquettes, NS, i + MM, j + NN);
 
-			// Appel recursif
-			marquerDescendantsNS(etiquettes, i + M, j, niv_resol, height, width);
-			marquerDescendantsNS(etiquettes, i, j + N, niv_resol, height, width);
-			marquerDescendantsNS(etiquettes, i + M, j + N, niv_resol, height,
-					width);
-		} else { // sous-bande haute frequence
-			// Etiquetage en ZNS des descendants directs
-			etiquettes[2 * i][2 * j] = NS;
-			etiquettes[2 * i + 1][2 * j] = NS;
-			etiquettes[2 * i][2 * j + 1] = NS;
-			etiquettes[2 * i + 1][2 * j + 1] = NS;
+				// Appel recursif
+				marquerDescendantsNS(etiquettes, i + MM, j, niv_resol, height,
+						width);
+				marquerDescendantsNS(etiquettes, i, j + NN, niv_resol, height,
+						width);
+				marquerDescendantsNS(etiquettes, i + MM, j + NN, niv_resol,
+						height, width);
+			}
 
-			// Appel recursif
-			marquerDescendantsNS(etiquettes, 2 * i, 2 * j, niv_resol, height,
-					width);
-			marquerDescendantsNS(etiquettes, 2 * i + 1, 2 * j, niv_resol,
-					height, width);
-			marquerDescendantsNS(etiquettes, 2 * i, 2 * j + 1, niv_resol,
-					height, width);
-			marquerDescendantsNS(etiquettes, 2 * i + 1, 2 * j + 1, niv_resol,
-					height, width);
 		}
+		/**
+		 * Sous-bande haute frequence
+		 */
+		else {
+			// Bord de l'image
+			if ((2 * i + 1 >= height) || (2 * j + 1 >= width))
+				return;
+			else {
+				// Etiquetage en ZNS des descendants directs
+				/*
+				 * for(int t = 0; t<3; t++){ etiquettes[2 * i][2 * j][t] =
+				 * NS[t]; etiquettes[2 * i + 1][2 * j][t] = NS[t]; etiquettes[2
+				 * * i][2 * j + 1][t] = NS[t]; etiquettes[2 * i + 1][2 * j +
+				 * 1][t] = NS[t]; }
+				 */
+				affecter(etiquettes, NS, 2 * i, 2 * j);
+				affecter(etiquettes, NS, 2 * i + 1, 2 * j);
+				affecter(etiquettes, NS, 2 * i, 2 * j + 1);
+				affecter(etiquettes, NS, 2 * i + 1, 2 * j + 1);
+
+				// Appel recursif
+				marquerDescendantsNS(etiquettes, 2 * i, 2 * j, niv_resol,
+						height, width);
+				marquerDescendantsNS(etiquettes, 2 * i + 1, 2 * j, niv_resol,
+						height, width);
+				marquerDescendantsNS(etiquettes, 2 * i, 2 * j + 1, niv_resol,
+						height, width);
+				marquerDescendantsNS(etiquettes, 2 * i + 1, 2 * j + 1,
+						niv_resol, height, width);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param etiquettes
+	 * @param etiq
+	 * @param u
+	 * @param v
+	 */
+	private static void affecter(boolean[][][] etiquettes, boolean[] etiq,
+			int u, int v) {
+		etiquettes[u][v] = etiq;
+	}
+
+	/*
+	 * private static boolean estEgal(boolean[][][] etiquettes, boolean[] etiq,
+	 * int u, int v) { if ((etiq[0] == etiquettes[u][v][0]) && (etiq[1] ==
+	 * etiquettes[u][v][1]) && (etiq[2] == etiquettes[u][v][2])) return true;
+	 * return false; }
+	 */
+
+	/**
+	 * 
+	 * @param etiquettes
+	 * @param i
+	 * @param j
+	 * @param dos
+	 * @throws IOException
+	 */
+	private static void ecrireEtiquette(boolean[][][] etiquettes, int i, int j,
+			DataOutputStream dos) throws IOException {
+		for (int t = 0; t < etiquettes[i][j].length; t++)
+			dos.writeBoolean(etiquettes[i][j][t]);
 	}
 
 	// FAUX MAIS ON GARDE AU CAS OU.
