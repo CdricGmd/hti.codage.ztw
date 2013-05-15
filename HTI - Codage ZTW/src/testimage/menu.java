@@ -80,7 +80,7 @@ public class menu extends JFrame {
 	TitledBorder titledBorder2;
 	JTextField erreurName = new JTextField();
 	JPanel jPanel4 = new JPanel();
-	JButton jButtonTraitement = new JButton();
+	JButton jButtonTransformee = new JButton();
 	JTextField Tvalue = new JTextField();
 	JLabel jLabel1 = new JLabel();
 	GridBagLayout gridBagLayout1 = new GridBagLayout();
@@ -88,7 +88,7 @@ public class menu extends JFrame {
 	JLabel jLabel2 = new JLabel();
 	JLabel jLabel3 = new JLabel();
 	JLabel jLabel5 = new JLabel();
-	JComboBox ComboTraitement = new JComboBox();
+	JComboBox ComboTransformee = new JComboBox();
 	JLabel jLabel6 = new JLabel();
 	JPanel jPanel5 = new JPanel();
 	BorderLayout borderLayout1 = new BorderLayout();
@@ -96,7 +96,7 @@ public class menu extends JFrame {
 	JButton jButton2 = new JButton();
 	JButton jButHisto = new JButton();
 
-	Fenetrage jtoto;
+//	Fenetrage jtoto;
 
 	GridLayout gridLayout1 = new GridLayout();
 	JTextField modifName = new JTextField();
@@ -108,7 +108,7 @@ public class menu extends JFrame {
 	JButton BAffichModif = new JButton();
 	JLabel jLabel9 = new JLabel();
 	JComboBox jComboW = new JComboBox();
-	JLabel jLabel10 = new JLabel();
+	//JLabel jLabel10 = new JLabel();
 	JComboBox jComboH = new JComboBox();
 	JButton JButModifFen = new JButton();
 
@@ -142,7 +142,7 @@ public class menu extends JFrame {
 
 		titledBorder1 = new TitledBorder("");
 		titledBorder2 = new TitledBorder("");
-		jtoto = new Fenetrage(Fw,Fh);
+//		jtoto = new Fenetrage(Fw,Fh);
 		this.getContentPane().setLayout(borderLayout4);
 		jButton1.setText("Ouvrir image...");
 		jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -159,9 +159,9 @@ public class menu extends JFrame {
 		oriName.setDisabledTextColor(Color.black);
 		oriName.setHorizontalAlignment(SwingConstants.CENTER);
 
-		//Fenetrage
-		jtoto.setBorder(BorderFactory.createLoweredBevelBorder());
-		jtoto.setSize(Fw*10,Fh*10);
+//		//Fenetrage
+//		jtoto.setBorder(BorderFactory.createLoweredBevelBorder());
+//		jtoto.setSize(Fw*10,Fh*10);
 
 		erreurName.setHorizontalAlignment(SwingConstants.CENTER);
 		erreurName.setDisabledTextColor(Color.black);
@@ -169,14 +169,14 @@ public class menu extends JFrame {
 		erreurName.setMinimumSize(new Dimension(200, 21));
 		erreurName.setMaximumSize(new Dimension(200, 21));
 		erreurName.setEnabled(false);
-		jButtonTraitement.setText("Appliquer traitement");
-		jButtonTraitement.addActionListener(new java.awt.event.ActionListener() {
+		jButtonTransformee.setText("Appliquer transformee");
+		jButtonTransformee.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				jButtonTraitement_actionPerformed(e);
+				jButtonTransformee_actionPerformed(e);
 			}
 		});
 		jPanel4.setLayout(gridBagLayout1);
-		jLabel1.setText("Pas de quantification :");
+		jLabel1.setText("Taux de compression : 1:N");
 		Tvalue.setText("1");
 		Tvalue.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -185,10 +185,10 @@ public class menu extends JFrame {
 		jLabel3.setHorizontalAlignment(SwingConstants.CENTER);
 		jLabel3.setText("_________________________________________________________");
 
-		jLabel5.setText("Fenetrage causal :");
+		//jLabel5.setText("Fenetrage causal :");
 		jLabel6.setHorizontalAlignment(SwingConstants.CENTER);
-		jLabel6.setText("Traitement :");
-		jPanel5.setLayout(borderLayout1);
+		jLabel6.setText("Transformee :");
+		//jPanel5.setLayout(borderLayout1);
 		jButton2.setText("Quitter");
 		jButton2.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -238,12 +238,12 @@ public class menu extends JFrame {
 				BAffichModif_actionPerformed(e);
 			}
 		});
-		jLabel9.setText("Largeur :");
-		jLabel10.setText("Hauteur :");
+		jLabel9.setText("Niveaux de resolution :");
+//		jLabel10.setText("Hauteur :");
 		JButModifFen.setText("Modifier");
 		JButModifFen.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JButModifFen_actionPerformed(e);
+//				JButModifFen_actionPerformed(e);
 			}
 		});
 		jPanel2.add(jLabel4, null);
@@ -255,6 +255,7 @@ public class menu extends JFrame {
 		jPanel2.add(jLabel8, null);
 		jPanel2.add(modifName, null);
 		jPanel2.add(BAffichModif, null);
+		
 		jPanel4.add(jLabel3, new GridBagConstraints(0, 1, 8, 1, 0.0, 0.0
 				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(0, 9, 9, 10), 62, 0));
 		jPanel4.add(Tvalue, new GridBagConstraints(3, 2, 4, 1, 1.0, 0.0
@@ -263,21 +264,21 @@ public class menu extends JFrame {
 				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 11), 0, 0));
 		jPanel4.add(jComboW, new GridBagConstraints(3, 4, 1, 1, 0.0, 0.0
 				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 3), 29, 0));
-		jPanel4.add(jLabel10, new GridBagConstraints(4, 4, 1, 1, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 11, 2, 15), 0, 0));
+//		jPanel4.add(jLabel10, new GridBagConstraints(4, 4, 1, 1, 0.0, 0.0
+//				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 11, 2, 15), 0, 0));
 		jPanel4.add(jComboH, new GridBagConstraints(5, 4, 1, 1, 0.0, 0.0
 				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 4), 28, 0));
 		jPanel4.add(JButModifFen, new GridBagConstraints(6, 4, 1, 1, 0.0, 0.0
 				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 9, 0, 0), 0, 0));
-		jPanel4.add(jtoto, new GridBagConstraints(3, 5, 2, 2, 0.0, 0.0
-				,GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(15, 3, 8, 0), 76, 13));
-		jPanel4.add(jButtonTraitement,   new GridBagConstraints(2, 7, 3, 1, 0.0, 0.0
+//		jPanel4.add(jtoto, new GridBagConstraints(3, 5, 2, 2, 0.0, 0.0
+//				,GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(15, 3, 8, 0), 76, 13));
+		jPanel4.add(jButtonTransformee,   new GridBagConstraints(2, 7, 3, 1, 0.0, 0.0
 				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(14, 0, 0, 6), 40, 0));
 		jPanel4.add(jLabel1,                         new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0
 				,GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(5, 1, 0, 0), 0, 0));
 		jPanel4.add(jLabel5,                   new GridBagConstraints(0, 4, 2, 2, 0.0, 0.0
 				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 12, 0));
-		jPanel4.add(ComboTraitement,                               new GridBagConstraints(1, 3, 4, 1, 0.0, 0.0
+		jPanel4.add(ComboTransformee,                               new GridBagConstraints(1, 3, 4, 1, 0.0, 0.0
 				,GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(21, 2, 22, 39), 0, 0));
 		jPanel4.add(jLabel6,                     new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(15, 83, 12, 2), 37, 0));
@@ -288,7 +289,7 @@ public class menu extends JFrame {
 		jPanel1.add(jPanel5,                         new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0
 				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 		jPanel5.add(jPanel4, BorderLayout.CENTER);
-
+		
 		//****************
 		/* jPanel4.add(jtoto,    new GridBagConstraints(0, 3, 4, 1, 0.0, 0.0
             ,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 321, 29)); */
@@ -314,13 +315,17 @@ public class menu extends JFrame {
 	 */
 	void jButton1_actionPerformed(ActionEvent e) {
 
-		JFileChooser Ffile=new JFileChooser("./Images");
+		JFileChooser Ffile=new JFileChooser("./Images/");
 
-		//Filtrage type de fichier a selectionner
+		//Filtrage type de fichier a selectionner/
 		MonFiltre mfi = new MonFiltre(
 				new String[]{"gif","jpg"},
 				"les fichiers image (*.gif, *.jpg)");
+		MonFiltre mfi2 = new MonFiltre(
+				new String[]{"bitstream"},
+				"les fichiers code (*.bitstream)");
 		Ffile.addChoosableFileFilter(mfi);
+		Ffile.addChoosableFileFilter(mfi2);
 
 		int retour=Ffile.showOpenDialog(null);
 
@@ -423,25 +428,24 @@ public class menu extends JFrame {
 
 
 
-	void jButtonTraitement_actionPerformed(ActionEvent e) {
+	void jButtonTransformee_actionPerformed(ActionEvent e) {
 		int valIntens=0;
 		try{
 			try{
 				valIntens=Integer.parseInt(Tvalue.getText());
-				if( (valIntens<-255) ||(valIntens>255) )
+				if( (valIntens<1) )
 				{
-					JOptionPane.showMessageDialog(null,"Entrez une valeur entre -255 et 255","Erreur",JOptionPane.ERROR_MESSAGE);;
+					JOptionPane.showMessageDialog(null,"Entrez une valeur > 1","Erreur",JOptionPane.ERROR_MESSAGE);;
 					Tvalue.requestFocus();
 					return;
 				}
 			}
 			catch(NumberFormatException ex){
-				JOptionPane.showMessageDialog(null,"Entrez une valeur entre -255 et 255","Erreur",JOptionPane.ERROR_MESSAGE);;
+				JOptionPane.showMessageDialog(null,"Entrez une valeur > 1","Erreur",JOptionPane.ERROR_MESSAGE);;
 				Tvalue.requestFocus();
 				return;
 			}
 
-			doTraitement(this.bufIm,valIntens);
 		}
 		catch(NullPointerException ex2){
 			return;
@@ -449,7 +453,15 @@ public class menu extends JFrame {
 	}
 
 
-	public void doTraitement(BufferedImage Iori,int valeur){
+	/**
+	 * @param Iori
+	 * @param valeur
+	 */
+	/**
+	 * @param Iori
+	 * @param valeur
+	 */
+	public void doTransformee(BufferedImage Iori,int valeur){
 		//Recupere pixels de l'image dans un tableau
 
 
@@ -466,7 +478,7 @@ public class menu extends JFrame {
 		//System.out.println("Extraction des coefficients");
 		double[][] coeff = new double[Fw][Fh];
 
-
+		/*
 		for(int i =0;i<Fw;i++)
 			for(int j=0;j<Fh;j++)
 			{   if ((i<Fw-1)||(j<Fh-1))
@@ -479,8 +491,9 @@ public class menu extends JFrame {
 			}
 			//coeff[i][k]=1;
 			}
-
 		coeff[Fw-1][Fh-1]=0;
+		*/
+		
 		/*
       int somme=0;
       for(int i=0;i<Fw;i++)
@@ -494,9 +507,9 @@ public class menu extends JFrame {
        	for(int j=0;j<Fh;j++)
           coeff[i][j]/=somme;
 		 */
-
+/*
 		//################### Methode 32x32 #######################
-		if(ComboTraitement.getSelectedItem()=="Prediction par blocs")
+		if(ComboTransformee.getSelectedItem()=="Prediction par blocs")
 		{
 			//System.out.println("Prediction par blocs");
 			double[][] donnee = TraitImage.getPixelTab(Iori);
@@ -510,7 +523,7 @@ public class menu extends JFrame {
 			double[][] carre_o = new double[32][32];
 			double[][] erreur_i = new double[32][32];
 
-			//##########################debut traitement blocs normaux 32x32
+			//##########################debut transformee blocs normaux 32x32
 			for (int i=0;i<(donnee.length/32)-1;i++)
 				for (int j=0;j<(donnee[0].length/32)-1;j++)
 				{//System.out.println("Copie bloc ["+i+"]["+j+"]");
@@ -543,7 +556,7 @@ public class menu extends JFrame {
 						}
 				}
 
-			//#################################traitement des blocs de droite
+			//#################################transformee des blocs de droite
 			if ((((donnee.length/32)-1)*32)!=donnee.length)
 			{
 				int reste = donnee.length-(((donnee.length/32)-1)*32);
@@ -584,7 +597,7 @@ public class menu extends JFrame {
 				}
 			}
 
-			//##########################debut traitement blocs du bas
+			//##########################debut transformee blocs du bas
 			if ((((donnee[0].length/32)-1)*32)!=donnee[0].length)
 			{
 				int reste = donnee[0].length-(((donnee[0].length/32)-1)*32);
@@ -625,7 +638,7 @@ public class menu extends JFrame {
 				}
 			}
 
-			//##########################debut traitement blocs du bas a droite
+			//##########################debut transformee blocs du bas a droite
 			if ((((donnee[0].length/32)-1)*32)!=donnee[0].length)
 				if ((((donnee.length/32)-1)*32)!=donnee.length)
 				{
@@ -671,8 +684,8 @@ public class menu extends JFrame {
 			for(int i=0;i<erreur.length;i++)
 				for(int j=0;j<erreur[0].length;j++)
 				{
-					/* if (erreur[i][j]<0)
-                   System.out.println(erreur[i][j]+" ");*/
+					 if (erreur[i][j]<0)
+                   System.out.println(erreur[i][j]+" ");
 					erreur[i][j]=Math.abs(erreur[i][j]);
 
 				}
@@ -688,14 +701,14 @@ public class menu extends JFrame {
 
 
 
-
+*/
 		//################### Methode globale #######################
 		//modifIm=TraitImage.setPixelTab(donnee);
-		if(ComboTraitement.getSelectedItem()=="Prediction globale")
+		if(ComboTransformee.getSelectedItem()=="Prediction globale")
 		{
 
 
-			//System.out.println("Debut traitement");
+			//System.out.println("Debut transformee");
 			//System.out.println("Centrage de l'image");
 			//double moyenne = TraitImage.calculMoyenne(Iori);
 			double[][] donnee = TraitImage.centrageImage(Iori,0);
@@ -708,9 +721,9 @@ public class menu extends JFrame {
 			//System.out.println("Calcul prediction");
 
 			/* MODIF TITUS */
-			for(int i=0;i<coeff.length;i++)
-				for(int j=0;j<coeff[0].length;j++)
-					System.out.println("coeff "+coeff[i][j]);
+			//for(int i=0;i<coeff.length;i++)
+			//	for(int j=0;j<coeff[0].length;j++)
+			//		System.out.println("coeff "+coeff[i][j]);
 			//		coeff[0][0] = 0.0; 	coeff[0][1] = 0.5; 	coeff[1][0] = 0.5; 
 			/* FIN MODIF TITUS */
 			
@@ -723,12 +736,12 @@ public class menu extends JFrame {
 			erreur = t.forward( donnee );
 			*/
 			int niv_resolution = 8;
-			int required_size = 130;
+			int required_size = 1/valeur;
+			
 			TraitImage.haar2D_multi(donnee, erreur, niv_resolution);
-			
-			
+			CodageZTW ztw = new CodageZTW();
 			try {
-				CodageZTW.ztw_code(erreur, 512, 512, niv_resolution, required_size, nomOri + ".bitstream");
+				ztw.ztw_code(erreur, erreur.length, erreur[0].length, niv_resolution, required_size, nomOri + ".bitstream");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -739,6 +752,13 @@ public class menu extends JFrame {
 			 * Transformee inverse
 			 */
 			double[][] x_rec = new double[donnee.length][donnee[0].length];
+			
+			try {
+				ztw.ztw_decode(erreur, 512, 512, niv_resolution, nomOri + ".bitstream");
+			} catch (Exception e){//IOException e) {
+				 //TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			TraitImage.haar2D_multi_inv(erreur,x_rec, niv_resolution);
 			/*
 			x_rec = t.reverse( erreur );
@@ -748,7 +768,7 @@ public class menu extends JFrame {
 			//TraitImage.predictionAR2d_inv(erreur,x_rec, coeff, Integer.parseInt(Tvalue.getText()),moyenne);
 			//System.out.println("Changement de format");
 			modifIm = TraitImage.setPixelTab(x_rec);
-			//System.out.println("Fin traitement");
+			//System.out.println("Fin transformee");
 			//modifIm =TraitImage.applicMasque(modifIm,coeff,Fw*2-1,Fh*2-1);
 
 			//System.out.println("end");
@@ -782,10 +802,10 @@ public class menu extends JFrame {
 
 	//Initialise champs de la comboBox
 	public void initCombo(){
-		/* ComboTraitement.addItem("Aucun");
-    ComboTraitement.addItem("Moyenneur");*/
-		ComboTraitement.addItem("Prediction globale");
-		ComboTraitement.addItem("Prediction par blocs");
+		/* ComboTransformee.addItem("Aucun");
+    ComboTransformee.addItem("Moyenneur");*/
+		ComboTransformee.addItem("Prediction globale");
+		ComboTransformee.addItem("Prediction par blocs");
 
 		for(int i=1;i<=10;i++)
 		{
@@ -881,13 +901,13 @@ public class menu extends JFrame {
 		}
 	}
 
-	void JButModifFen_actionPerformed(ActionEvent e) {
-		this.jtoto.w=Integer.parseInt(jComboW.getSelectedItem().toString());
-		this.jtoto.h=Integer.parseInt(jComboH.getSelectedItem().toString());
-		this.parent.w=this.jtoto.w;
-		this.parent.h=this.jtoto.h;
-		this.parent.MAJ(this.jtoto.w,this.jtoto.h);
-	}
+//	void JButModifFen_actionPerformed(ActionEvent e) {
+//		this.jtoto.w=Integer.parseInt(jComboW.getSelectedItem().toString());
+//		this.jtoto.h=Integer.parseInt(jComboH.getSelectedItem().toString());
+//		this.parent.w=this.jtoto.w;
+//		this.parent.h=this.jtoto.h;
+//		this.parent.MAJ(this.jtoto.w,this.jtoto.h);
+//	}
 
 
 

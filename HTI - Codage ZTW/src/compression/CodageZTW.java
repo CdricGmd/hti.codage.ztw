@@ -20,7 +20,7 @@ import java.io.IOException;
  * @author Cedric Golmard, Ghizlane Aroussi
  * @version 1.0
  */
-public abstract class CodageZTW {
+public class CodageZTW {
 
 	/**
 	 * Code binaire des classes de pixels.
@@ -28,32 +28,47 @@ public abstract class CodageZTW {
 	 * Remarque : le premier boolean est false si non significatif, true si
 	 * significatif
 	 */
-
+	private int debug_temp;
 	/**
 	 * Code binaire d'un pixel Zero-Tree Root
 	 */
-	public final static boolean[] ZTR = { false, false, true };
+	//private final  boolean[] ZTR = { false, false, true };
+	private final int ZTR = 0x0000;
 
 	/**
 	 * Code binaire d'un pixel Zero-Isolated
 	 */
-	public final static boolean[] ZI = { false, true, true };
+	//private final  boolean[] ZI = { false, true, true };
+	private final int ZI = 0x0001;
 
 	/**
 	 * Code binaire d'un pixel Positive
 	 */
-	public final static boolean[] P = { true, true, true };
+	//private final  boolean[] P = { true, true, true };
+	private final int P = 0x0003;
 
 	/**
 	 * Code binaire d'un pixel Negative
 	 */
-	public final static boolean[] N = { true, false, true };
+	//private final  boolean[] N = { true, false, true };
+	private final int N = 0x0002;
 
 	/**
 	 * Code pour un pixel descendant d'un ZTR
 	 */
-	public final static boolean[] NS = { false, false, false };
+	//private final  boolean[] NS = { false, false, false };
+	private final int NS = 0x0004;
 
+	private int bitBuffer;
+	private final  int sizeOfBitBuffer = 32;
+	private  int posBuffer;
+	
+	public CodageZTW(){
+		this.bitBuffer = 0x0000;
+		this.posBuffer = 0x0000;
+		debug_temp = 0;
+	}
+	
 	/**
 	 * Codage ZTW d'une image transformee.
 	 * <p>
@@ -78,7 +93,7 @@ public abstract class CodageZTW {
 	 * @throws IOException
 	 */
 	// condition : niv-resol < sqrt(height)
-	public static int ztw_code(double[][] xt, int width, int height,
+	public int ztw_code(double[][] xt, int width, int height,
 			int niv_resol, int size, String bitstream_name) throws IOException {
 		/**
 		 * Initialisation
@@ -86,13 +101,12 @@ public abstract class CodageZTW {
 		int MM = (int) (height / Math.pow(2, niv_resol - 1));
 		int NN = (int) (width / Math.pow(2, niv_resol - 1));
 		double T = seuil(xt);
-
-		boolean[][][] etiquettes = new boolean[height][width][3];
-		boolean[] vrai = { true, true, true };
+		int current_size = 0;
+		int[][] etiquettes = new int[height][width];
 		for (int i = 0; i < height; i++)
 			for (int j = 0; j < width; j++)
-				affecter(etiquettes, vrai, i, j);
-
+				affecter(etiquettes, 0xFFFF, i, j);
+		
 		DataOutputStream ecrivain = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(bitstream_name)));
 
@@ -105,77 +119,89 @@ public abstract class CodageZTW {
 		 * Ecriture du seuil initial
 		 */
 		ecrivain.writeDouble(T);
-
+		
+		/**
+		 * Ecriture de la sous-bande basses frequences
+		 */
+		for (int i = 0; i < MM; i++) {
+			for (int j = 0; j < NN; j++) {
+				ecrivain.writeDouble(xt[i][j]);
+			}
+		}
+		
 		/**
 		 * Iterations de l'algorithme
 		 */
-		while (ecrivain.size() < (size * 1000)) {
+		while (current_size  < (size * 1000)) {
+			/**
+			 * Reaffectation des etiquettes
+			 */
+			for (int i = 0; i < height; i++)
+				for (int j = 0; j < width; j++)
+					affecter(etiquettes, 0xFFFF, i, j);
+			
 			MM = (int) (height / Math.pow(2, niv_resol - 1));
 			NN = (int) (width / Math.pow(2, niv_resol - 1));
 			
 			/**
 			 * Sous-bande basses frequences
+			 * 
 			 */
+			/*
 			for (int i = 0; i < MM; i++) {
 				for (int j = 0; j < NN; j++) {
 					determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 							height, width);
-					if (!estEgal(etiquettes, NS, i, j)){
-						// for (int t = 0; t < etiquettes[i][j].length; t++)
-						// ecrivain.writeBoolean(etiquettes[i][j][t]);
-						ecrireEtiquette(etiquettes, i, j, ecrivain);
-					}
-					
+					ecrireEtiquette(etiquettes, i, j, ecrivain);
 				}
 			}
-
+			*/
 			/**
 			 * Sous-bande hautes frequences
+			 * 
 			 */
 			while (MM < height && NN < width) {
 				for (int i = 0; i < MM; i++)
 					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 1
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
-						if (!estEgal(etiquettes, NS, i, j)){
-							// for (int t = 0; t < etiquettes[i][j].length; t++)
-							// ecrivain.writeBoolean(etiquettes[i][j][t]);
-							ecrireEtiquette(etiquettes, i, j, ecrivain);
-						}
+						ecrireEtiquette(etiquettes, i, j, ecrivain);
+						
 					}
 				for (int i = MM; i < 2 * MM; i++)
 					for (int j = 0; j < NN; j++) { // Sous-bande 2
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
-						if (!estEgal(etiquettes, NS, i, j)){
-							ecrireEtiquette(etiquettes, i, j, ecrivain);
-						}
+						ecrireEtiquette(etiquettes, i, j, ecrivain);
 					}
 				for (int i = MM; i < 2 * MM; i++)
 					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 3
 						determinerEtiquette(xt, etiquettes, i, j, T, niv_resol,
 								height, width);
-						if (!estEgal(etiquettes, NS, i, j)){
-							ecrireEtiquette(etiquettes, i, j, ecrivain);
-						}
+						ecrireEtiquette(etiquettes, i, j, ecrivain);
 					}
 				MM *= 2;
 				NN *= 2;
 			}
-			/**
-			 * Actualisation des coefficients de l'image
-			 */
 			
 			System.out.println("[CodageZTW] : taille du fichier "+ (ecrivain.size() / 1000) + " kbit. ");
 			// Flush : écrit cette partie dans le fichier, au cas ou ça bloque
 			// avant on a toujours cette partie de codée.
+			current_size = ecrivain.size();
 			ecrivain.flush();
 			
-			if(ecrivain.size() < (size * 1000)){
+			if(current_size < (size * 1000)){
+				/**
+				 * Actualisation du seuil et des coefficients de l'image
+				 */
 				T /= 2;
-				actualiseCoeff(xt, etiquettes, T, height, width);
+				actualiseCoeff(xt, etiquettes, T, niv_resol, height, width);
 			}
 			else{
+				ecrivain.writeInt(bitBuffer);
+				current_size = ecrivain.size();
+				bitBuffer = 0;
+				posBuffer = 0;
 				break;
 			}
 		}
@@ -183,11 +209,11 @@ public abstract class CodageZTW {
 		/**
 		 * Fermeture du fichier et fin.
 		 */
-
+		ecrivain.close();
 		System.out.println("[CodageZTW] : fin du codage de l'image dans '"
 				+ bitstream_name + "'. ");
-		ecrivain.close();
-		return 0;
+		
+		return current_size;
 	}
 
 	/**
@@ -209,77 +235,79 @@ public abstract class CodageZTW {
 	 * @return entier informant de la reussite ou non du decodage
 	 * @throws IOException
 	 */
-	public static int ztw_decode(double[][] xtrec, int width, int height,
+	public  int ztw_decode(double[][] xtrec, int width, int height,
 			int niv_resol, String bitstream_name) throws IOException {
 		/**
 		 * 
 		 */
-		boolean[][][] etiquettes = new boolean[height][width][3];
-		boolean[] vrai = { true, true, true };
+		int[][] etiquettes = new int[height][width];
 		double T = 0;
-		int NN = 0, MM = 0;
-		assert (xtrec.length == height && xtrec[0].length == width);
+		int MM = (int) (height / Math.pow(2, niv_resol - 1));
+		int NN = (int) (width / Math.pow(2, niv_resol - 1));
+		assert (xtrec.length >= height && xtrec[0].length >= width);
 		for (int i = 0; i < height; i++)
 			for (int j = 0; j < width; j++)
 				xtrec[i][j] = 0;
+		etiquettes = new int[height][width];
 		/**
 		 * Ouverture du fichier
 		 */
 		DataInputStream dis = null;
 		dis = new DataInputStream(new FileInputStream(new File(bitstream_name)));
 
-		System.out.println("[CodageZTW] : decodage de l'image dans '"
-				+ bitstream_name + "'... ");
+		System.out.println("[CodageZTW] : decodage de '"+ bitstream_name + "'... ");
 
 		/**
 		 * Lecture du seuil initial
 		 */
 		T = dis.readDouble();
 		/**
+		 * Lecture de la sous-bande basse frequence
+		 */
+		for (int i = 0; i < MM; i++) {
+			for (int j = 0; j < NN; j++) {
+				xtrec[i][j] = dis.readDouble();
+			}
+		}
+		/**
 		 * Iteration
 		 */
-		while (dis.available() > 0) {
+		while (dis.available() > 4) {
 			System.out.println("[CodageZTW] : seuil = " + T);
 			System.out.println("[CodageZTW] : reste " + dis.available() / 1000
 					+ " kbit a decoder.");
-			etiquettes = new boolean[height][width][3];
 			for (int i = 0; i < height; i++)
 				for (int j = 0; j < width; j++) {
-					affecter(etiquettes, vrai, i, j);
+					affecter(etiquettes, 0xFFFF, i, j);
 				}
 			/**
 			 * Sous-bande basses frequences
 			 */
-			System.out.println("[CodageZTW] : debug = LF");
-			MM = (int) (height / Math.pow(2, niv_resol - 1));
-			NN = (int) (width / Math.pow(2, niv_resol - 1));
+			/*
 			for (int i = 0; i < MM; i++) {
 				for (int j = 0; j < NN; j++) {
 					readEtiquetteFromBitstream(etiquettes, width, height,
 							niv_resol, i, j, dis);
 				}
 			}
+			*/
+			MM = (int) (height / Math.pow(2, niv_resol - 1));
+			NN = (int) (width / Math.pow(2, niv_resol - 1));
 			/**
 			 * Sous-bande hautes frequences
 			 */
 			while (MM < height && NN < width) {
-				System.out.println("[CodageZTW] : debug = HF1");
 				for (int i = 0; i < MM; i++)
 					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 1
-						readEtiquetteFromBitstream(etiquettes, width, height,
-								niv_resol, i, j, dis);
+						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
 					}
-				System.out.println("[CodageZTW] : debug = HF2");
 				for (int i = MM; i < 2 * MM; i++)
 					for (int j = 0; j < NN; j++) { // Sous-bande 2
-						readEtiquetteFromBitstream(etiquettes, width, height,
-								niv_resol, i, j, dis);
+						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
 					}
-				System.out.println("[CodageZTW] : debug = HF3");
 				for (int i = MM; i < 2 * MM; i++)
 					for (int j = NN; j < 2 * NN; j++) { // Sous-bande 3
-						readEtiquetteFromBitstream(etiquettes, width, height,
-								niv_resol, i, j, dis);
+						readEtiquetteFromBitstream(etiquettes, width, height, niv_resol, i, j, dis);
 					}
 				MM *= 2;
 				NN *= 2;
@@ -287,26 +315,20 @@ public abstract class CodageZTW {
 			/**
 			 * Actualisation des coefficients de l'image
 			 */
-			System.out.println("[CodageZTW] : debug = coefs");
-			for (int i = 0; i < height; i++)
-				for (int j = 0; j < width; j++) {
-					actualiseCoeff(xtrec, etiquettes, T, height, width);
-				}
+			actualiseCoeff(xtrec, etiquettes, T,niv_resol, height, width);
 			/**
 			 * Actualisation du seuil
 			 */
-			System.out.println("[CodageZTW] : debug = seuil");
 			T /= 2;
 		}
 
 		dis.close();
-		System.out.println("[CodageZTW] : fin du decodage de l'image dans '"
-				+ bitstream_name + "'... ");
+		System.out.println("[CodageZTW] : fin du decodage de l'image dans '"+ bitstream_name + "'... ");
 		return 0;
 	}
 
 	/**
-	 * 
+	 * readEtiquetteFromBitstream
 	 * @param etiquettes
 	 * @param width
 	 * @param height
@@ -316,27 +338,56 @@ public abstract class CodageZTW {
 	 * @param dis
 	 * @throws IOException
 	 */
-	static void readEtiquetteFromBitstream(boolean[][][] etiquettes, int width,
+	 private void readEtiquetteFromBitstream(int [][] etiquettes, int width,
 			int height, int niv_resol, int i, int j, DataInputStream dis)
 			throws IOException {
+		 
+		if(i>height || j>width){
+			 return;
+		}
 		/**
-		 * Cas 1 : etiquette NS, descendant de ZTR
-		 */
+		* Cas 1 : etiquette NS, descendant de ZTR.
+		*/
 		if (estEgal(etiquettes, NS, i, j)) {
 			return;
 		}
 		/**
-		 * Cas general : lecture de l'etiquette dans le fichier
+		 * Recharcher le buffer si deja parcouru.
 		 */
-		boolean[] etiq = { dis.readBoolean(), dis.readBoolean(),
-				dis.readBoolean() };
-		affecter(etiquettes, etiq, i, j);
-
+		if(posBuffer == 0x0000){
+			if(dis.available()>4){
+				bitBuffer = dis.readInt();
+			}else{
+				return;
+			}
+		}
 		/**
-		 * Verification de la descendance si ZTR
+		 * Lecture de l'etiquette.
 		 */
-		if (estEgal(etiquettes, ZTR, i, j)) {
-			marquerDescendantsNS(etiquettes, i, j, niv_resol, height, width);
+		else{
+			/**
+			 * Recuperation de l'étiquette.
+			 */
+			int etiq = 0x0000;
+			int bitMask = 0x0003;
+			bitMask = (bitMask << (sizeOfBitBuffer - posBuffer -2));
+			etiq |= (bitBuffer & bitMask);
+			etiq = etiq >> (sizeOfBitBuffer - posBuffer);
+			posBuffer += 2;
+
+			/**
+			 * Affectation et verification de la descendance si ZTR.
+			 */
+			affecter(etiquettes, etiq, i, j);
+			if (estEgal(etiquettes, ZTR, i, j)) {
+				marquerDescendantsNS(etiquettes, i, j, niv_resol, height, width);
+			}
+			/**
+			 * Verification de la position courante dans le buffer.
+			 */
+		}
+		if(posBuffer >= sizeOfBitBuffer){
+			posBuffer = 0x0000;
 		}
 	}
 
@@ -352,13 +403,14 @@ public abstract class CodageZTW {
 	 * 
 	 * @return valeur de seuil initiale
 	 */
-	private static double seuil(double[][] donnee) {
-		double max_temp = -1;
+	private  double seuil(double[][] donnee) {
+		double max_temp = -10000;
 		for (int i = 0; i < donnee.length; i++)
-			for (int j = 0; j < donnee[i].length; j++)
-				if (max_temp < Math.abs(donnee[i][j]))
+			for (int j = 0; j < donnee[0].length; j++)
+				if (max_temp < Math.abs(donnee[i][j])){
 					max_temp = Math.abs(donnee[i][j]);
-		return max_temp / 2;
+				}
+		return (max_temp / 2);
 	}
 
 	/**
@@ -377,16 +429,26 @@ public abstract class CodageZTW {
 	 * 
 	 * @return nouvelle valeur du coefficient
 	 */
-	private static void actualiseCoeff(double donnee[][],
-			boolean[][][] etiquettes, double seuil, int height, int width) {
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				if (estEgal(etiquettes, P, i, j))
-					donnee[i][j] -= seuil;
-				else if (estEgal(etiquettes, N, i, j))
-					donnee[i][j] += seuil;
+	//private  void actualiseCoeff(double donnee[][],boolean[][][] etiquettes, double seuil, int height, int width) {
+	private  void actualiseCoeff(double donnee[][],int[][] etiquettes, double seuil, int niv_resol, int height, int width) {
+		int MM = (int) (height / Math.pow(2, niv_resol - 1));
+		int NN = (int) (width / Math.pow(2, niv_resol - 1));
+		for (int i = 0; i<MM; i++) {
+			for (int j = NN; j<width; j++) {
+				
 			}
 		}
+		for (int i = MM; i<height; i++) {
+			for (int j = 0; j<width; j++) {
+				if (estEgal(etiquettes, P, i, j)){
+					donnee[i][j] -= seuil;
+				}
+				else if (estEgal(etiquettes, N, i, j)){
+					donnee[i][j] += seuil;
+				}
+			}
+		}
+		return;
 	}
 
 	/**
@@ -401,9 +463,8 @@ public abstract class CodageZTW {
 	 * @param height
 	 * @param width
 	 */
-	private static void determinerEtiquette(double[][] x,
-			boolean[][][] etiquettes, int i, int j, double seuil,
-			int niv_resol, int height, int width) {
+	//private  void determinerEtiquette(double[][] x,boolean[][][] etiquettes, int i, int j, double seuil, int niv_resol, int height, int width) {
+	private  void determinerEtiquette(double[][] x,int[][] etiquettes, int i, int j, double seuil, int niv_resol, int height, int width) {
 		
 		/**
 		 * Extremites depassees
@@ -415,12 +476,10 @@ public abstract class CodageZTW {
 		/**
 		 * Etiquette deja connue
 		 */
-		if (etiquettes[i][j] != null
-				&& ((estEgal(etiquettes, NS, i, j)) || (estEgal(etiquettes, N, i, j))
-						|| (estEgal(etiquettes, P, i, j)) || (estEgal(etiquettes, ZI, i, j)) || (estEgal(etiquettes, ZTR, i, j)))) {
+		else if ((estEgal(etiquettes, NS, i, j)) || (estEgal(etiquettes, N, i, j))
+						|| (estEgal(etiquettes, P, i, j)) || (estEgal(etiquettes, ZI, i, j)) || (estEgal(etiquettes, ZTR, i, j))) {
 			// Rien a faire =)
 		}
-
 		/**
 		 * Pixel significatif
 		 */
@@ -460,9 +519,9 @@ public abstract class CodageZTW {
 				/**
 				 * Pixel ZI
 				 */
-				else if (etiquettes[i][j + NN][0] == true
-						| etiquettes[i + MM][j][0] == true
-						| etiquettes[i + MM][j + NN][0] == true) {
+				else if (etiquettes[i][j + NN] == P || etiquettes[i][j + NN] == N || etiquettes[i][j + NN] == ZI
+						|| etiquettes[i+MM][j] == P || etiquettes[i+MM][j] == N || etiquettes[i+MM][j] == ZI
+						|| etiquettes[i+MM][j+NN] == P || etiquettes[i+MM][j+NN] == N || etiquettes[i+MM][j+NN] == ZI) {
 					affecter(etiquettes, ZI, i, j);
 				}
 				/**
@@ -498,10 +557,10 @@ public abstract class CodageZTW {
 				/**
 				 * Pixel ZI
 				 */
-				else if (etiquettes[2 * i][2 * j][0] == true
-						| etiquettes[2 * i + 1][2 * j][0] == true
-						| etiquettes[2 * i][2 * j + 1][0] == true
-						| etiquettes[2 * i + 1][2 * j + 1][0] == true) {
+				else if (etiquettes[2 * i][2 * j] == P || etiquettes[2 * i][2 * j] == N || etiquettes[2 * i][2 * j] == ZI
+						|| etiquettes[2 * i+1][2 * j] == P || etiquettes[2 * i+1][2 * j] == N || etiquettes[2 * i+1][2 * j] == ZI
+						|| etiquettes[2 * i][2 * j +1] == P || etiquettes[2 * i][2 * j +1] == N || etiquettes[2 * i][2 * j+1] == ZI
+						|| etiquettes[2 * i+1][2 * j +1] == P || etiquettes[2 * i+1][2 * j +1] == N || etiquettes[2 * i+1][2 * j+1] == ZI){
 					affecter(etiquettes, ZI, i, j);
 				}
 				/**
@@ -526,8 +585,9 @@ public abstract class CodageZTW {
 	 * @param height
 	 * @param width
 	 */
-	private static void marquerDescendantsNS(boolean[][][] etiquettes, int i,
-			int j, int niv_resol, int height, int width) {
+	private  void marquerDescendantsNS(int[][] etiquettes, int i,int j, int niv_resol, int height, int width) {
+	//private  void marquerDescendantsNS(boolean[][][] etiquettes, int i,int j, int niv_resol, int height, int width) {
+	
 		/**
 		 * Critere d'arret bords de l'image
 		 */
@@ -597,8 +657,8 @@ public abstract class CodageZTW {
 	 * @param u
 	 * @param v
 	 */
-	private static void affecter(boolean[][][] etiquettes, boolean[] etiq,
-			int u, int v) {
+	private  void affecter(int[][] etiquettes, int etiq,int u, int v) {
+	//private  void affecter(boolean[][][] etiquettes, boolean[] etiq,int u, int v) {
 		etiquettes[u][v] = etiq;
 	}
 
@@ -610,27 +670,62 @@ public abstract class CodageZTW {
 		 * @param v
 		 * @return
 		 */
-	 private static boolean estEgal(boolean[][][] etiquettes, boolean[] etiq, int u, int v) { 
-		if ((etiq[0] == etiquettes[u][v][0]) && (etiq[1] == etiquettes[u][v][1]) && (etiq[2] == etiquettes[u][v][2])) 
-			return true;
-		return false;
+	 //private  boolean estEgal(boolean[][][] etiquettes, boolean[] etiq, int u, int v) { 
+	private  boolean estEgal(int[][] etiquettes, int etiq, int u, int v) { 
+		//if ((etiq[0] == etiquettes[u][v][0]) && (etiq[1] == etiquettes[u][v][1]) && (etiq[2] == etiquettes[u][v][2])) 
+		//	return true;
+		//return false;
+		return (etiq == etiquettes[u][v]);
 	}
 	 
 
 	/**
-	 * 
+	 * Ecriture des etiquettes a l'aide d'un buffer.
+	 * L'entier bitBuffer (32bits) accumule les 16 prochaines etiquettes (16x2 bits) a ecrire.
+	 * Lorsque le buffer est plein, il est ecrit dans DataOutputStream.
 	 * @param etiquettes
 	 * @param i
 	 * @param j
 	 * @param dos
 	 * @throws IOException
 	 */
-	private static void ecrireEtiquette(boolean[][][] etiquettes, int u, int v,
-			DataOutputStream dos) throws IOException {
-			dos.writeBoolean(etiquettes[u][v][0]);
-			dos.writeBoolean(etiquettes[u][v][1]);
+	private  void ecrireEtiquette(int[][] etiquettes, int u, int v,DataOutputStream dos) throws IOException {
+	//private  void ecrireEtiquette(boolean[][][] etiquettes, int u, int v,DataOutputStream dos) throws IOException {
+			if( u >= etiquettes.length || v >= etiquettes[0].length)
+				return;
+			if(etiquettes[u][v] == NS)
+				return;
+			
+			bitBuffer |= (etiquettes[u][v] >> (sizeOfBitBuffer - posBuffer));
+			posBuffer +=2;
+
+			/*
+			for(int t=0; t<2; t++){
+				if(etiquettes[u][v][t] == true){
+					// Met le bit courant du buffer a 1
+					bitBuffer = bitBuffer | (1 >> (sizeOfBitBuffer - posBuffer));
+					posBuffer ++;
+				}else{
+					// Met le bit courant du buffer a 0
+					bitBuffer = bitBuffer & ~(1 >> (sizeOfBitBuffer - posBuffer));
+					posBuffer ++;
+				}		
+			}
+			*/
+			
+			/**
+			 * Lorsque le buffer est plein, on écrit l'octet entier.
+			 */
+			if(posBuffer >= sizeOfBitBuffer){
+				dos.writeByte(bitBuffer);
+				bitBuffer = 0;
+				posBuffer = 0;
+			}
 	}
 
+	//private boolean estSignificatif(int etiq){
+	//	return ((etiq == P)  || (etiq == N));
+	//}
 	// FAUX MAIS ON GARDE AU CAS OU.
 	// /**
 	// * Effectue un balayage de l'image transformee selon l'ordre de parcours

@@ -11,10 +11,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import javax.swing.ImageIcon;
+import javax.xml.crypto.dsig.Transform;
 
-import math.jwave.Transform;
-import math.jwave.transforms.WaveletPacketTransform;
-import math.jwave.transforms.wavelets.Haar02;
 import testimage.ImageIO;
 import testimage.TraitImage;
 
@@ -44,31 +42,33 @@ public class test_main {
 		
 		
 		//ouvrirOnd(file, file, xt, height, width );
-		Transform t = new Transform( new WaveletPacketTransform( new Haar02( ) ) );
-		 double[ ][ ] matHilb = t.forward( xt ); // 2-D WPT Haar forward
+		//Transform t = new Transform( new WaveletPacketTransform( new Haar02( ) ) );
+		 //double[ ][ ] matHilb = t.forward( xt ); // 2-D WPT Haar forward
 
 		    
 		System.out.println("Ouverture de " + file);
-		
+		/*
 		try {
-			CodageZTW.ztw_code(matHilb, height, width, 4, 700, "lena512-2.ond.bitstream");
+			CodageZTW.ztw_code(xt, height, width, 4, 700, "lena512-2.ond.bitstream");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		*/
 		System.out.println("Image codee !");
 		
 		double[][] image_reconstruite = new double[height][width];
+		/*
 		try {
 			CodageZTW.ztw_decode(image_reconstruite, 512, 512, 4, "lena512-2.ond.bitstream");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 		
 		System.out.println("Image decodee !");
-		double[ ][ ] matReco = t.reverse( matHilb ); // 2-D WPT Haar reverse
+		//double[ ][ ] matReco = t.reverse( matHilb ); // 2-D WPT Haar reverse
 	}
 	
 	/*
