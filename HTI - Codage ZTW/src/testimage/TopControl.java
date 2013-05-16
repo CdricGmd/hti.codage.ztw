@@ -24,7 +24,7 @@ public class TopControl {
 		me=new menu(this,w,h);
 		me.show();
 		me.ouvrirIm(path,nom);
-		me.jComboH.setSelectedIndex(h-1);
-		me.jComboW.setSelectedIndex(w-1);
+		me.jComboNivResolution.setSelectedIndex(h-1);
+//		me.jComboW.setSelectedIndex(w-1);
 	}
 }

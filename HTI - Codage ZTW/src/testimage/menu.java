@@ -2,6 +2,7 @@ package testimage;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,9 +12,11 @@ import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -28,13 +31,20 @@ import javax.swing.border.TitledBorder;
 
 import compression.CodageZTW;
 
-
-
 /**
- * <p>Title: TestImage</p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: </p>
+ * <p>
+ * Title: TestImage
+ * </p>
+ * <p>
+ * Description:
+ * </p>
+ * <p>
+ * Copyright: Copyright (c) 2003
+ * </p>
+ * <p>
+ * Company:
+ * </p>
+ * 
  * @author unascribed
  * @version 1.0
  */
@@ -45,15 +55,14 @@ public class menu extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 4371450938936625837L;
-	JPanel jPanel1 = new JPanel();
-	JButton jButton1 = new JButton();
 
-	ImageIO imIO=new ImageIO();
-	String pathOri="";
-	String nomOri="";
-	JPanel jPanel2 = new JPanel();
-	JTextField oriName = new JTextField();
-
+	ImageIO imIO = new ImageIO();
+	String pathOri = "";
+	String nomOri = "";
+	JTextField oriName = new JTextField(10);
+	
+	String nomBitstream = "";
+	String pathBitstream = "";
 
 	int[] oriHisto = new int[256];
 	int[] modifHisto = new int[256];
@@ -61,140 +70,126 @@ public class menu extends JFrame {
 	double oriEntrop = 0;
 	double modifEntrop = 0;
 	double erreurEntrop = 0;
-	Histogramme histoGraphOri = new Histogramme(oriHisto,"originale",Color.blue,oriEntrop);
-	Histogramme histoGraphModif = new Histogramme(modifHisto,"modifiee",Color.red,modifEntrop);
-	Histogramme histoGraphErreur = new Histogramme(erreurHisto,"Erreur prediction",Color.green,erreurEntrop);
+	Histogramme histoGraphOri = new Histogramme(oriHisto, "originale",
+			Color.blue, oriEntrop);
+	Histogramme histoGraphModif = new Histogramme(modifHisto, "modifiee",
+			Color.red, modifEntrop);
+	Histogramme histoGraphErreur = new Histogramme(erreurHisto,
+			"Erreur prediction", Color.green, erreurEntrop);
 
 	private Image imageOri;
 	private BufferedImage bufIm;
 	private BufferedImage modifIm;
 	private BufferedImage erreurIm;
-	CadreImage oriCadre = new CadreImage(bufIm,"Image originale");
-	CadreImage modifCadre = new CadreImage(modifIm,"Image modifiee");
-	CadreImage erreurCadre = new CadreImage(modifIm,"Erreur de prediction");
+	double[][] erreur;
+			
+	CadreImage oriCadre = new CadreImage(bufIm, "Image originale");
+	CadreImage modifCadre = new CadreImage(modifIm, "Image modifiee");
+	CadreImage erreurCadre = new CadreImage(modifIm, "Image transformee");
 	TopControl parent;
 	int Fw;
 	int Fh;
 
 	TitledBorder titledBorder1;
 	TitledBorder titledBorder2;
-	JTextField erreurName = new JTextField();
-	JPanel jPanel4 = new JPanel();
-	JButton jButtonTransformee = new JButton();
-	JTextField Tvalue = new JTextField();
-	JLabel jLabel1 = new JLabel();
-	GridBagLayout gridBagLayout1 = new GridBagLayout();
-	GridBagLayout gridBagLayout2 = new GridBagLayout();
-	JLabel jLabel2 = new JLabel();
-	JLabel jLabel3 = new JLabel();
-	JLabel jLabel5 = new JLabel();
-	JComboBox ComboTransformee = new JComboBox();
-	JLabel jLabel6 = new JLabel();
-	JPanel jPanel5 = new JPanel();
-	BorderLayout borderLayout1 = new BorderLayout();
-	BorderLayout borderLayout4 = new BorderLayout();
-	JButton jButton2 = new JButton();
+
+	JPanel jPanelTop = new JPanel();
+	JPanel jPanelFiles = new JPanel();
+	JPanel jPanelMid = new JPanel();
+	JPanel jPanelTransform = new JPanel();
+	JPanel jPanelCodage = new JPanel();
+
+	JButton jButtonOpenImage = new JButton();
+	JButton jButtonOpenBitstream = new JButton();
+	JButton jButtonQuit = new JButton();
 	JButton jButHisto = new JButton();
-
-//	Fenetrage jtoto;
-
-	GridLayout gridLayout1 = new GridLayout();
-	JTextField modifName = new JTextField();
-	JLabel jLabel4 = new JLabel();
-	JLabel jLabel7 = new JLabel();
-	JLabel jLabel8 = new JLabel();
+	JButton jButtonTransformee = new JButton();
+	JButton jButtonTransInverse = new JButton();
+	JButton jButtonCodage = new JButton();
+	JButton jButtonDecodage = new JButton();
 	JButton BAfficheOri = new JButton();
 	JButton BAffichErreur = new JButton();
 	JButton BAffichModif = new JButton();
-	JLabel jLabel9 = new JLabel();
-	JComboBox jComboW = new JComboBox();
-	//JLabel jLabel10 = new JLabel();
-	JComboBox jComboH = new JComboBox();
 	JButton JButModifFen = new JButton();
 
+	JTextField erreurName = new JTextField(10);
+	JTextField Tvalue = new JTextField();
+	JTextField modifName = new JTextField(10);
+	JTextField fieldHeight = new JTextField(4);
+	JTextField fieldWidth = new JTextField(4);
 
+	JLabel jLabelTauxComp = new JLabel();
+	JLabel jLabelTextLine1 = new JLabel();
+	JLabel jLabelTextLine2 = new JLabel();
+	JLabel jLabel5 = new JLabel();
+	JLabel jLabel6 = new JLabel();
+	JLabel jLabel4 = new JLabel();
+	JLabel jLabel7 = new JLabel();
+	JLabel jLabel8 = new JLabel();
+	JLabel jLabelNivResolution = new JLabel();
+	JLabel jLabelTransformee = new JLabel();
+	JLabel jLabelHeight = new JLabel();
+	JLabel jLabelWidth = new JLabel();
 
+	JComboBox jComboTransformee = new JComboBox();
+	JComboBox jComboNivResolution = new JComboBox();
+	JComboBox jComboTauxCompression = new JComboBox();
 
-	public menu(TopControl parent, int w,int h) {
+	GridBagLayout gridBagLayout1 = new GridBagLayout();
+	GridBagLayout gridBagLayout2 = new GridBagLayout();
+	GridBagLayout gridBagLayout3 = new GridBagLayout();
+	GridLayout gridLayout1 = new GridLayout();
+
+	JPanel hBoxTop1 = new JPanel();
+	JPanel hBoxTop2 = new JPanel();
+	Box hBoxBot = Box.createVerticalBox();
+	Box vBoxCodage = Box.createHorizontalBox();
+	Box vBoxTransformee = Box.createHorizontalBox();	
+	Box vBoxFiles = Box.createVerticalBox();
+	Box vBox = Box.createVerticalBox();
+	
+	BorderLayout borderLayout1 = new BorderLayout();
+	BorderLayout borderLayout4 = new BorderLayout();
+
+	// Fenetrage jtoto;
+	// JComboBox jComboW = new JComboBox();
+	// JLabel jLabel10 = new JLabel();
+
+	public menu(TopControl parent, int w, int h) {
 		try {
 
-			this.parent=parent;
-			this.Fw=w;
-			this.Fh=h;
+			this.parent = parent;
+			this.Fw = w;
+			this.Fh = h;
 			jbInit();
 			initCombo();
-			PlaceFenetres.PlaceFenetre(1.7/2.0,1.9/2.0,this);
-		}
-		catch(Exception e) {
+			PlaceFenetres.PlaceFenetre(1.3 / 2.0, 1.3 / 2.0, this);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-
-
-
 
 	private void jbInit() throws Exception {
 
 		oriCadre.setName("oriCadre");
 		modifCadre.setName("modifCadre");
 		erreurCadre.setName("erreurCadre");
-
-		titledBorder1 = new TitledBorder("");
-		titledBorder2 = new TitledBorder("");
-//		jtoto = new Fenetrage(Fw,Fh);
-		this.getContentPane().setLayout(borderLayout4);
-		jButton1.setText("Ouvrir image...");
-		jButton1.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				jButton1_actionPerformed(e);
-			}
-		});
+		
 		this.setDefaultCloseOperation(3);
-		this.setTitle("Ouverture Image");
+		this.setTitle("Compression et codage d'image");
+		
+		
 		oriName.setEnabled(false);
-		oriName.setMaximumSize(new Dimension(200, 21));
-		oriName.setMinimumSize(new Dimension(200, 21));
-		oriName.setPreferredSize(new Dimension(300, 21));
+		oriName.setMaximumSize(oriName.getPreferredSize());
 		oriName.setDisabledTextColor(Color.black);
-		oriName.setHorizontalAlignment(SwingConstants.CENTER);
-
-//		//Fenetrage
-//		jtoto.setBorder(BorderFactory.createLoweredBevelBorder());
-//		jtoto.setSize(Fw*10,Fh*10);
-
-		erreurName.setHorizontalAlignment(SwingConstants.CENTER);
 		erreurName.setDisabledTextColor(Color.black);
-		erreurName.setPreferredSize(new Dimension(300, 21));
-		erreurName.setMinimumSize(new Dimension(200, 21));
-		erreurName.setMaximumSize(new Dimension(200, 21));
+		erreurName.setMaximumSize(erreurName.getPreferredSize());
 		erreurName.setEnabled(false);
-		jButtonTransformee.setText("Appliquer transformee");
-		jButtonTransformee.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				jButtonTransformee_actionPerformed(e);
-			}
-		});
-		jPanel4.setLayout(gridBagLayout1);
-		jLabel1.setText("Taux de compression : 1:N");
-		Tvalue.setText("1");
-		Tvalue.setHorizontalAlignment(SwingConstants.CENTER);
+		modifName.setEnabled(false);
+		modifName.setDisabledTextColor(Color.black);
+		modifName.setText("");
+		modifName.setMaximumSize(modifName.getPreferredSize());
 
-		jPanel1.setLayout(gridBagLayout2);
-		jLabel2.setText("_________________________________________________________");
-		jLabel3.setHorizontalAlignment(SwingConstants.CENTER);
-		jLabel3.setText("_________________________________________________________");
-
-		//jLabel5.setText("Fenetrage causal :");
-		jLabel6.setHorizontalAlignment(SwingConstants.CENTER);
-		jLabel6.setText("Transformee :");
-		//jPanel5.setLayout(borderLayout1);
-		jButton2.setText("Quitter");
-		jButton2.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				jButton2_actionPerformed(e);
-			}
-		});
 		jButHisto.setText("Afficher Histogramme");
 		jButHisto.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -203,23 +198,13 @@ public class menu extends JFrame {
 		});
 		histoGraphModif.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		histoGraphOri.getContentPane().setBackground(SystemColor.control);
-		jPanel2.setLayout(gridLayout1);
-		gridLayout1.setColumns(3);
-		gridLayout1.setHgap(5);
-		gridLayout1.setRows(3);
-		gridLayout1.setVgap(5);
-		modifName.setEnabled(false);
-		modifName.setDisabledTextColor(Color.black);
-		modifName.setText("");
-		modifName.setHorizontalAlignment(SwingConstants.CENTER);
-		jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
-		jLabel4.setText("Image originale :");
+		
+		jLabel4.setText("Image originale : ");
 		jLabel7.setRequestFocusEnabled(true);
 		jLabel7.setVerifyInputWhenFocusTarget(true);
-		jLabel7.setHorizontalAlignment(SwingConstants.RIGHT);
-		jLabel7.setText("Erreur de prediction :");
-		jLabel8.setHorizontalAlignment(SwingConstants.RIGHT);
-		jLabel8.setText("Image reconstituee :");
+		jLabel7.setText("Image transformee : ");
+		jLabel8.setText("Image reconstituee : ");
+		
 		BAfficheOri.setText("Afficher");
 		BAfficheOri.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -238,585 +223,614 @@ public class menu extends JFrame {
 				BAffichModif_actionPerformed(e);
 			}
 		});
-		jLabel9.setText("Niveaux de resolution :");
-//		jLabel10.setText("Hauteur :");
 		JButModifFen.setText("Modifier");
 		JButModifFen.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				JButModifFen_actionPerformed(e);
+				// JButModifFen_actionPerformed(e);
 			}
 		});
-		jPanel2.add(jLabel4, null);
-		jPanel2.add(oriName, null);
-		jPanel2.add(BAfficheOri, null);
-		jPanel2.add(jLabel7, null);
-		jPanel2.add(erreurName, null);
-		jPanel2.add(BAffichErreur, null);
-		jPanel2.add(jLabel8, null);
-		jPanel2.add(modifName, null);
-		jPanel2.add(BAffichModif, null);
+	
+		jComboTransformee.setMaximumSize(new Dimension(300, 50));
+		jComboNivResolution.setMaximumSize(new Dimension(70, 50));
+		jComboTauxCompression.setMaximumSize(new Dimension(70, 50));
 		
-		jPanel4.add(jLabel3, new GridBagConstraints(0, 1, 8, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(0, 9, 9, 10), 62, 0));
-		jPanel4.add(Tvalue, new GridBagConstraints(3, 2, 4, 1, 1.0, 0.0
-				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(0, 0, 0, 113), 79, 0));
-		jPanel4.add(jLabel9, new GridBagConstraints(2, 4, 1, 2, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 11), 0, 0));
-		jPanel4.add(jComboW, new GridBagConstraints(3, 4, 1, 1, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 3), 29, 0));
-//		jPanel4.add(jLabel10, new GridBagConstraints(4, 4, 1, 1, 0.0, 0.0
-//				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 11, 2, 15), 0, 0));
-		jPanel4.add(jComboH, new GridBagConstraints(5, 4, 1, 1, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 4), 28, 0));
-		jPanel4.add(JButModifFen, new GridBagConstraints(6, 4, 1, 1, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 9, 0, 0), 0, 0));
-//		jPanel4.add(jtoto, new GridBagConstraints(3, 5, 2, 2, 0.0, 0.0
-//				,GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(15, 3, 8, 0), 76, 13));
-		jPanel4.add(jButtonTransformee,   new GridBagConstraints(2, 7, 3, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(14, 0, 0, 6), 40, 0));
-		jPanel4.add(jLabel1,                         new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(5, 1, 0, 0), 0, 0));
-		jPanel4.add(jLabel5,                   new GridBagConstraints(0, 4, 2, 2, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 12, 0));
-		jPanel4.add(ComboTransformee,                               new GridBagConstraints(1, 3, 4, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(21, 2, 22, 39), 0, 0));
-		jPanel4.add(jLabel6,                     new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0
-				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(15, 83, 12, 2), 37, 0));
-		jPanel4.add(jButton2,             new GridBagConstraints(0, 8, 5, 1, 0.0, 0.0
-				,GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(7, 172, 13, 0), 0, 0));
-		jPanel4.add(jPanel2,                                              new GridBagConstraints(0, 0, 9, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE, new Insets(0, 1, 0, 16), -436, -12));
-		jPanel1.add(jPanel5,                         new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		jPanel5.add(jPanel4, BorderLayout.CENTER);
+		jLabel6.setText("Transformee :");
+		jLabelNivResolution.setText("Niveaux de resolution :");
+		jLabelTransformee.setText("Type de transformee :");
+		jLabelTauxComp.setText("Taux de compression : ");
+		jLabelNivResolution.setMaximumSize(jLabelNivResolution.getPreferredSize());
+		jLabelTransformee.setMaximumSize(jLabelTransformee.getPreferredSize());
+		jLabelTauxComp.setMaximumSize(jLabelTauxComp.getPreferredSize());
+		jLabelHeight.setText("H = ");
+		jLabelWidth.setText("W = ");
+		jLabelTextLine1.setText("___________________________________________________________________________________");
+		jLabelTextLine2.setText("___________________________________________________________________________________");
 		
-		//****************
-		/* jPanel4.add(jtoto,    new GridBagConstraints(0, 3, 4, 1, 0.0, 0.0
-            ,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 321, 29)); */
-            //**************************
+		jButtonQuit.setText("Quitter");
+		jButtonOpenImage.setText("Ouvrir image...");
+		jButtonOpenBitstream.setText("Ouvrir fichier code...");
+		jButtonTransformee.setText("Appliquer transformee");
+		jButtonTransInverse.setText("Appliquer inverse");
+		jButtonCodage.setText("Appliquer le codage");
+		jButtonDecodage.setText("Appliquer le decodage");
+		jButtonOpenImage.setMaximumSize(jButtonOpenImage.getPreferredSize());
+		jButtonOpenBitstream.setMaximumSize(jButtonOpenImage.getPreferredSize());
+		jButHisto.setMaximumSize(jButHisto.getPreferredSize());
+		jButtonCodage.setMaximumSize(jButtonCodage.getPreferredSize());
+		jButtonQuit.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				jButton2_actionPerformed(e);
+			}});
+		jButtonTransformee.addActionListener(
+			new java.awt.event.ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					jButtonTransformee_actionPerformed(e);
+			}});
+		jButtonCodage.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				jButtonCodage_actionPerformed(e);
+			}});
+		jButtonOpenImage.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				jButton1_actionPerformed(e);
+			}});
+		jButtonOpenBitstream.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				jButtonOpenBitstream_actionPerformed(e);
+			}});
+		jButtonTransInverse.addActionListener(
+				new java.awt.event.ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						jButtonTransInverse_actionPerformed(e);
+				}});
+		jButtonDecodage.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					jButtonDecodage_actionPerformed(e);
+				}});
+		
+		fieldHeight.setEnabled(true);
+		fieldWidth.setEnabled(true);
+		fieldHeight.setMaximumSize(fieldHeight.getPreferredSize());
+		fieldWidth.setMaximumSize(fieldWidth.getPreferredSize());
+		
+		/**
+		 * Partie files
+		 */
+		Box hBoxF1 = Box.createHorizontalBox();
+		Box hBoxF2 = Box.createHorizontalBox();
+		Box hBoxF3 = Box.createHorizontalBox();
+		hBoxF1.add(jLabel4, null);
+		hBoxF1.add(oriName, null);
+		hBoxF1.add(BAfficheOri, null);
+		hBoxF2.add(jLabel7, null);
+		hBoxF2.add(erreurName, null);
+		hBoxF2.add(BAffichErreur, null);
+		hBoxF3.add(jLabel8, null);
+		hBoxF3.add(modifName, null);
+		hBoxF3.add(BAffichModif, null);
+		Box hBoxS1 = Box.createHorizontalBox();
+		
+		hBoxS1.add(Box.createVerticalStrut(10));
+		hBoxS1.add(jLabelHeight);
+		hBoxS1.add(fieldHeight);
+		hBoxS1.add(jLabelWidth);
+		hBoxS1.add(fieldWidth);
+		hBoxS1.add(Box.createVerticalStrut(10));
+		
+		vBoxFiles.add(hBoxS1);
+		vBoxFiles.add(hBoxF1);
+		vBoxFiles.add(hBoxF2);
+		vBoxFiles.add(hBoxF3);
+		/**
+		 * Transformeee et codage
+		 */
+		Box hBoxT1 = Box.createHorizontalBox();
+		hBoxT1.add(Box.createVerticalStrut(10));
+		hBoxT1.add(jLabelTransformee);
+		hBoxT1.add(jComboTransformee);
+		hBoxT1.add(Box.createVerticalStrut(10));
+		hBoxT1.add(jLabelNivResolution);
+		hBoxT1.add(jComboNivResolution);
+		hBoxT1.add(Box.createVerticalStrut(10));	
+		hBoxT1.add(jLabelTauxComp);
+		hBoxT1.add(jComboTauxCompression);
+		hBoxT1.add(Box.createVerticalStrut(10));
+		
 
-		jPanel1.add(jButton1,      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0
-				,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 111, 5, 25), 97, -1));
-		jPanel1.add(jButHisto,      new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(2, 37, 6, 88), 27, -2));
-		jPanel1.add(jLabel2,     new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0
-				,GridBagConstraints.SOUTH, GridBagConstraints.NONE, new Insets(5, 0, 11, 0), 0, 0));
-		this.getContentPane().add(jPanel1, BorderLayout.CENTER);
 
+		
+		//vBoxTransformee.add(hBoxT1);
+		//vBoxTransformee.add(hBoxT2);
+		//vBoxCodage.add(hBoxC1);
+		//vBoxCodage.add(hBoxC2);
+		/**
+		 * Bot et Top
+		 */
+		hBoxTop1.add(Box.createVerticalStrut(10));
+		hBoxTop1.add(jButtonOpenImage);
+		hBoxTop1.add(jButtonTransformee);
+		hBoxTop1.add(jButtonCodage);
+		hBoxTop1.add(jButHisto);
+		hBoxTop1.add(Box.createVerticalStrut(10));
+		hBoxTop1.setMaximumSize(hBoxTop1.getPreferredSize());
+		
+		hBoxTop2.add(Box.createVerticalStrut(10));
+		hBoxTop2.add(jButtonOpenBitstream);
+		hBoxTop2.add(jButtonDecodage);
+		hBoxTop2.add(jButtonTransInverse);
+		hBoxTop2.add(jButHisto);
+		hBoxTop2.add(Box.createVerticalStrut(10));
+		hBoxTop2.setMaximumSize(hBoxTop2.getPreferredSize());
+		
+		hBoxBot.add(jButtonQuit);
+		/**
+		 * Assemblage
+		 */
+		vBox.add(hBoxTop1);
+		vBox.add(hBoxTop2);
+		vBox.add(Box.createGlue());
+		vBox.add(vBoxFiles);
+		vBox.add(Box.createGlue());
+		vBox.add(hBoxT1);
+		vBox.add(Box.createGlue());
+		vBox.add(hBoxBot);
+		this.getContentPane().add(vBox);
+	}
 
+	void jButtonTransInverse_actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		int niv_resolution = 1;
+		String transformee;
+		try {
+			try {
+				niv_resolution = jComboNivResolution.getSelectedIndex() + 1;
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez des valeurs correctes", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboNivResolution.requestFocus();
+				return;
+			}
+			try {
+				transformee = (String) jComboTransformee.getSelectedItem();
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez des valeurs correctes", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboTransformee.requestFocus();
+				return;
+			}
 
-
+		} catch (NullPointerException ex2) {
+			return;
+		}
+		doTransInverse(erreur, transformee, niv_resolution);
+	}
+	void jButtonDecodage_actionPerformed(ActionEvent e) {
+		int niv_resolution = 1;
+		int req_size = 1000;
+		int height =0, width =0;
+		try {
+			try {
+				niv_resolution = jComboNivResolution.getSelectedIndex() + 1;
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez une valeur correcte", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboNivResolution.requestFocus();
+				return;
+			}
+			try {
+				height = Integer.parseInt(fieldHeight.getText());
+				width = Integer.parseInt(fieldWidth.getText());
+				if(height <= 0 || width <= 0){
+					JOptionPane.showMessageDialog(null,
+							"Entrez des dimensions positives", "Erreur",
+							JOptionPane.ERROR_MESSAGE);
+					;
+					jComboNivResolution.requestFocus();
+					return;
+				}
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez une valeur correcte", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboNivResolution.requestFocus();
+				return;
+			}
+		if(pathBitstream.equals("")){
+			JOptionPane.showMessageDialog(null,
+					"Ouvrez d'abord un fichier.", "Erreur",
+					JOptionPane.ERROR_MESSAGE);
+			try {
+				throw new Exception("Ouvrez d'abord un fichier.");
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		} catch (NullPointerException ex2) {
+			return;
+		}
+		doDecodage(pathBitstream, height, width, niv_resolution);
 	}
 
 
+	void jButtonOpenBitstream_actionPerformed(ActionEvent e) {
+		JFileChooser Ffile2 = new JFileChooser("./Images/");
+
+		// Filtrage type de fichier a selectionner/
+		MonFiltre mfi2 = new MonFiltre(new String[] { "bitstream" },
+				"les fichiers code (*.bitstream)");
+		Ffile2.addChoosableFileFilter(mfi2);
+		Ffile2.setFileFilter(mfi2);
+
+		int retour = Ffile2.showOpenDialog(null);
+
+		if (retour == JFileChooser.APPROVE_OPTION) {
+			nomBitstream = Ffile2.getSelectedFile().getAbsolutePath();
+			pathBitstream = Ffile2.getSelectedFile().getName();
+		} else {
+			nomBitstream = "";
+			pathBitstream = "";
+		}
+	}
+
 	/**
 	 * Bouton d'ouverture de fichier
+	 * 
 	 * @param e
 	 */
 	void jButton1_actionPerformed(ActionEvent e) {
 
-		JFileChooser Ffile=new JFileChooser("./Images/");
+		JFileChooser Ffile = new JFileChooser("./Images/");
 
-		//Filtrage type de fichier a selectionner/
-		MonFiltre mfi = new MonFiltre(
-				new String[]{"gif","jpg"},
+		// Filtrage type de fichier a selectionner/
+		MonFiltre mfi = new MonFiltre(new String[] { "gif", "jpg" },
 				"les fichiers image (*.gif, *.jpg)");
-		MonFiltre mfi2 = new MonFiltre(
-				new String[]{"bitstream"},
-				"les fichiers code (*.bitstream)");
 		Ffile.addChoosableFileFilter(mfi);
-		Ffile.addChoosableFileFilter(mfi2);
+		Ffile.setFileFilter(mfi);
 
-		int retour=Ffile.showOpenDialog(null);
+		int retour = Ffile.showOpenDialog(null);
 
-		if (retour == JFileChooser.APPROVE_OPTION)
-		{
-			ouvrirIm(Ffile.getSelectedFile().getAbsolutePath(),Ffile.getSelectedFile().getName());
-			parent.path=Ffile.getSelectedFile().getAbsolutePath();
-			parent.nom=Ffile.getSelectedFile().getName();
-			/* this.pathOri=Ffile.getSelectedFile().getAbsolutePath();
-        this.nomOri=Ffile.getSelectedFile().getName();
-        oriName.setText(this.nomOri);
-        System.out.println("Fichier :"+this.nomOri+"\nChemin : "+this.pathOri+"\n");
-
-        erreurName.setText("");
-        modifName.setText("");*/
-		}
-		else {
-			ouvrirIm("","");
-			parent.path="";
-			parent.nom="";
+		if (retour == JFileChooser.APPROVE_OPTION) {
+			ouvrirIm(Ffile.getSelectedFile().getAbsolutePath(), Ffile
+					.getSelectedFile().getName());
+			parent.path = Ffile.getSelectedFile().getAbsolutePath();
+			parent.nom = Ffile.getSelectedFile().getName();
 			/*
-        System.out.println("Aucune selection\n");
-        return;*/
+			 * this.pathOri=Ffile.getSelectedFile().getAbsolutePath();
+			 * this.nomOri=Ffile.getSelectedFile().getName();
+			 * oriName.setText(this.nomOri);
+			 * System.out.println("Fichier :"+this.
+			 * nomOri+"\nChemin : "+this.pathOri+"\n");
+			 * 
+			 * erreurName.setText(""); modifName.setText("");
+			 */
+		} else {
+			ouvrirIm("", "");
+			parent.path = "";
+			parent.nom = "";
+			/*
+			 * System.out.println("Aucune selection\n"); return;
+			 */
 		}
 		/*
-    //Image d'origine
-    this.imageOri=imIO.OuvrirImage(this.pathOri);
-
-
-    //Image bufferisee
-    this.bufIm=TraitImage.toBufferedImage(this.imageOri);
-
-
-
+		 * //Image d'origine this.imageOri=imIO.OuvrirImage(this.pathOri);
+		 * 
+		 * 
+		 * //Image bufferisee
+		 * this.bufIm=TraitImage.toBufferedImage(this.imageOri);
 		 */
 	}
 
-	void ouvrirIm(String path,String nom){
-		if ((path != "")&&(path!=null)) {
+	void ouvrirIm(String path, String nom) {
+		if ((path != "") && (path != null)) {
 			this.pathOri = path;
 			this.nomOri = nom;
 			oriName.setText(this.nomOri);
-			System.out.println("Fichier :" + this.nomOri + "\nChemin : " +
-					this.pathOri + "\n");
+			System.out.println("Fichier :" + this.nomOri + "\nChemin : "
+					+ this.pathOri + "\n");
 
 			erreurName.setText("");
 			modifName.setText("");
-		}
-		else {
+		} else {
 			System.out.println("Aucune selection\n");
 			return;
 		}
-		//Image d'origine
-		this.imageOri=imIO.OuvrirImage(this.pathOri);
+		// Image d'origine
+		this.imageOri = imIO.OuvrirImage(this.pathOri);
 
-
-		//Image bufferisee
-		this.bufIm=TraitImage.toBufferedImage(this.imageOri);
-
+		// Image bufferisee
+		this.bufIm = TraitImage.toBufferedImage(this.imageOri);
+		fieldHeight.setText(""+bufIm.getHeight());
+		fieldWidth.setText(""+bufIm.getWidth());
 
 	}
 
+	void afficherIm(BufferedImage im, CadreImage zone, String titre) {
 
-
-	void afficherIm(BufferedImage im,CadreImage zone,String titre){
-
-		if(zone.getName()=="oriCadre")
-		{
+		if (zone.getName() == "oriCadre") {
 			oriCadre.dispose();
-			oriCadre = new CadreImage(im,titre);
-			double delta= oriCadre.getSize().getWidth()/2;
-			oriCadre.setLocation((int)(oriCadre.getLocation().getX()-delta-70),(int)(oriCadre.getLocation().getY()-70));
+			oriCadre = new CadreImage(im, titre);
+			double delta = oriCadre.getSize().getWidth() / 2;
+			oriCadre.setLocation(
+					(int) (oriCadre.getLocation().getX() - delta - 70),
+					(int) (oriCadre.getLocation().getY() - 70));
 			oriCadre.show();
-		}
-		else  if(zone.getName()=="modifCadre")
-		{
+		} else if (zone.getName() == "modifCadre") {
 			modifCadre.dispose();
-			modifCadre = new CadreImage(im,titre);
-			double delta= modifCadre.getSize().getWidth()/2;
-			modifCadre.setLocation((int)(modifCadre.getLocation().getX()+delta+70),(int)(modifCadre.getLocation().getY()-70));
+			modifCadre = new CadreImage(im, titre);
+			double delta = modifCadre.getSize().getWidth() / 2;
+			modifCadre
+					.setLocation(
+							(int) (modifCadre.getLocation().getX() + delta + 70),
+							(int) (modifCadre.getLocation().getY() - 70));
 			modifCadre.show();
-		}
-		else  if(zone.getName()=="erreurCadre")
-		{
+		} else if (zone.getName() == "erreurCadre") {
 			erreurCadre.dispose();
-			erreurCadre = new CadreImage(im,titre);
-			double delta= erreurCadre.getSize().getWidth()/2;
-			erreurCadre.setLocation((int)(erreurCadre.getLocation().getX()),(int)(erreurCadre.getLocation().getY()+70));
+			erreurCadre = new CadreImage(im, titre);
+			double delta = erreurCadre.getSize().getWidth() / 2;
+			erreurCadre.setLocation((int) (erreurCadre.getLocation().getX()),
+					(int) (erreurCadre.getLocation().getY() + 70));
 			erreurCadre.show();
 		}
 
-		if(modifName.getText().length()>0)
+		if (modifName.getText().length() > 0)
 			modifCadre.toFront();
-		if(erreurName.getText().length()>0)
+		if (erreurName.getText().length() > 0)
 			erreurCadre.toFront();
-		if(oriName.getText().length()>0)
+		if (oriName.getText().length() > 0)
 			oriCadre.toFront();
 
 	}
 
-
-
 	void jButtonTransformee_actionPerformed(ActionEvent e) {
-		int valIntens=0;
-		try{
-			try{
-				valIntens=Integer.parseInt(Tvalue.getText());
-				if( (valIntens<1) )
-				{
-					JOptionPane.showMessageDialog(null,"Entrez une valeur > 1","Erreur",JOptionPane.ERROR_MESSAGE);;
-					Tvalue.requestFocus();
-					return;
-				}
+		int niv_resolution = 1;
+		String transformee;
+		try {
+			try {
+				niv_resolution = jComboNivResolution.getSelectedIndex() + 1;
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez des valeurs correctes", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboNivResolution.requestFocus();
+				return;
 			}
-			catch(NumberFormatException ex){
-				JOptionPane.showMessageDialog(null,"Entrez une valeur > 1","Erreur",JOptionPane.ERROR_MESSAGE);;
-				Tvalue.requestFocus();
+			try {
+				transformee = (String) jComboTransformee.getSelectedItem();
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez des valeurs correctes", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboTransformee.requestFocus();
 				return;
 			}
 
-		}
-		catch(NullPointerException ex2){
+		} catch (NullPointerException ex2) {
 			return;
+		}
+		doTransformee(this.bufIm, transformee, niv_resolution);
+	}
+
+	/**
+	 * 
+	 * @param e
+	 */
+	void jButtonCodage_actionPerformed(ActionEvent e) {
+		int niv_resolution = 1;
+		int req_size = 1000;
+		try {
+			try {
+				niv_resolution = jComboNivResolution.getSelectedIndex() + 1;
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez une valeur correcte", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboNivResolution.requestFocus();
+				return;
+			}
+			try {
+				File f1 = new File(pathOri);
+				req_size = (int) (f1.length() / (1000 * Integer.parseInt((String) jComboTauxCompression.getSelectedItem())));
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(null,
+						"Entrez une valeur correcte", "Erreur",
+						JOptionPane.ERROR_MESSAGE);
+				;
+				jComboTauxCompression.requestFocus();
+				return;
+			}
+
+		} catch (NullPointerException ex2) {
+			return;
+		}
+		doCodage(erreur, niv_resolution, req_size);
+	}
+
+	/**
+	 * Codage ztw
+	 * @param Itrans
+	 * @param niv_resolution
+	 * @param required_size
+	 */
+	public void doCodage(double[][] err, int niv_resolution,
+			int required_size) {
+		pathBitstream = "./Images/"+ nomOri + ".bitstream";
+		/**
+		 * Image to double
+		 */
+		//double[][] transIm = new double[Itrans.getHeight()][Itrans.getWidth()];
+		//transIm = TraitImage.getPixelTab(Itrans);
+
+		CodageZTW ztw = new CodageZTW();
+
+		try {
+			ztw.ztw_code(err, err.length, err[0].length,
+					niv_resolution, required_size, pathBitstream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-
 	/**
+	 * Decodage ztw
+	 * @param path
+	 * @param niv_resolution
+	 */
+	void doDecodage(String path, int height, int width, int niv_resolution) {
+		
+		erreur = new double[height][width];
+		CodageZTW ztw = new CodageZTW();
+
+		try {
+			ztw.ztw_decode(erreur, erreur.length, erreur[0].length, niv_resolution, pathBitstream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/**
+		 * double to Image
+		 */
+		
+		erreurIm = TraitImage.setPixelTab(erreur);
+		
+	}
+	
+	/**
+	 * Transformee directe
 	 * @param Iori
 	 * @param valeur
 	 */
-	/**
-	 * @param Iori
-	 * @param valeur
-	 */
-	public void doTransformee(BufferedImage Iori,int valeur){
-		//Recupere pixels de l'image dans un tableau
+	public void doTransformee(BufferedImage Iori, String transformee,
+			int niv_resolution) {
+		// Recupere pixels de l'image dans un tableau
 
-
-
-
-		//int[][] donnee=TraitImage.getPixelTab(Iori);
+		// int[][] donnee=TraitImage.getPixelTab(Iori);
 
 		modifName.setText("");
 		modifCadre.dispose();
 		erreurName.setText("");
 		erreurCadre.dispose();
 
-		//####################Extraction des coefficient##################
-		//System.out.println("Extraction des coefficients");
-		double[][] coeff = new double[Fw][Fh];
+		// ################### HAAR #######################
+		// modifIm=TraitImage.setPixelTab(donnee);
+		if (transformee.equals("Transformee en ondelettes de Haar")) {
+			System.out.println("Debut transformee en ondelettes de Haar");
+			System.out.println("Niveaux de resolution : " + niv_resolution);
 
-		/*
-		for(int i =0;i<Fw;i++)
-			for(int j=0;j<Fh;j++)
-			{   if ((i<Fw-1)||(j<Fh-1))
-			{
-				JCheckBox temp=(JCheckBox)jtoto.getComponent(i+j*Fw);
-				if(temp.isSelected())
-					coeff[i][j]=1;
-				else
-					coeff[i][j]=0;
-			}
-			//coeff[i][k]=1;
-			}
-		coeff[Fw-1][Fh-1]=0;
-		*/
-		
-		/*
-      int somme=0;
-      for(int i=0;i<Fw;i++)
-       for(int j=0;j<Fh;j++)
-        somme+=coeff[i][j];
+			// System.out.println("Centrage de l'image");
+			// double moyenne = TraitImage.calculMoyenne(Iori);
+			double[][] donnee = TraitImage.centrageImage(Iori, 0);
+			// System.out.println("Moyenne ="+moyenne);
 
-      if (somme==0)
-        somme=1;
+			// TraitImage.getCoeff(donnee,coeff);
 
-       for(int i=0;i<Fw;i++)
-       	for(int j=0;j<Fh;j++)
-          coeff[i][j]/=somme;
-		 */
-/*
-		//################### Methode 32x32 #######################
-		if(ComboTransformee.getSelectedItem()=="Prediction par blocs")
-		{
-			//System.out.println("Prediction par blocs");
-			double[][] donnee = TraitImage.getPixelTab(Iori);
-			//System.out.println("Reservation memoire y="+donnee.length+" x="+donnee[0].length);
-			double[][] erreur = new double[donnee.length][donnee[0].length];
-			double[][] x_rec = new double[donnee.length][donnee[0].length];
-
-			double moyenne =0;
-			double[][] carre_c = new double[32][32];
-			double[][] carre_nc = new double[32][32];
-			double[][] carre_o = new double[32][32];
-			double[][] erreur_i = new double[32][32];
-
-			//##########################debut transformee blocs normaux 32x32
-			for (int i=0;i<(donnee.length/32)-1;i++)
-				for (int j=0;j<(donnee[0].length/32)-1;j++)
-				{//System.out.println("Copie bloc ["+i+"]["+j+"]");
-					for (int k=0;k<32;k++)
-						for (int l=0;l<32;l++)
-						{
-							carre_nc[k][l]=donnee[i*32+k][j*32+l];
-						}
-					//System.out.println("Moyenne");
-					moyenne = TraitImage.calculMoyenne(carre_nc);
-					//System.out.println("Centrage");
-					carre_c = TraitImage.centrageImage(carre_nc,moyenne);
-					//System.out.println("Prediction");
-
-					double[][] coeff_temp = new double[coeff.length][coeff[0].length];
-					for (int k=0;k<coeff.length;k++)
-						for (int l=0;l<coeff[0].length;l++)
-							coeff_temp[k][l]=coeff[k][l];
-					TraitImage.getCoeff(carre_c,coeff_temp);
-
-					TraitImage.predictionAR2d(carre_c,erreur_i, coeff_temp, Integer.parseInt(Tvalue.getText()));
-					//System.out.println("Restitution");
-					TraitImage.predictionAR2d_inv(erreur_i,carre_o, coeff_temp, Integer.parseInt(Tvalue.getText()),moyenne);
-					//System.out.println("Copie vers sortie");
-					for (int k=0;k<32;k++)
-						for (int l=0;l<32;l++)
-						{
-							erreur[i*32+k][j*32+l]=erreur_i[k][l];
-							x_rec[i*32+k][j*32+l]=carre_o[k][l];
-						}
-				}
-
-			//#################################transformee des blocs de droite
-			if ((((donnee.length/32)-1)*32)!=donnee.length)
-			{
-				int reste = donnee.length-(((donnee.length/32)-1)*32);
-				double[][] carre_c_droite = new double[reste][32];
-				double[][] carre_nc_droite = new double[reste][32];
-				double[][] carre_o_droite = new double[reste][32];
-				double[][] erreur_i_droite = new double[reste][32];
-				for (int j=0;j<(donnee[0].length/32)-1;j++)
-				{
-					for (int k=0;k<reste;k++)
-						for (int l=0;l<32;l++)
-						{
-							carre_nc_droite[k][l]=donnee[(((donnee.length/32)-1)*32)+k][j*32+l];
-						}
-					//System.out.println("Moyenne");
-					moyenne = TraitImage.calculMoyenne(carre_nc_droite);
-					//System.out.println("Centrage");
-					carre_c_droite = TraitImage.centrageImage(carre_nc_droite,moyenne);
-					//System.out.println("Prediction");
-
-					double[][] coeff_temp = new double[coeff.length][coeff[0].length];
-					for (int k=0;k<coeff.length;k++)
-						for (int l=0;l<coeff[0].length;l++)
-							coeff_temp[k][l]=coeff[k][l];
-
-					TraitImage.getCoeff(carre_c_droite,coeff_temp);
-
-					TraitImage.predictionAR2d(carre_c_droite,erreur_i_droite, coeff_temp, Integer.parseInt(Tvalue.getText()));
-					//System.out.println("Restitution");
-					TraitImage.predictionAR2d_inv(erreur_i_droite,carre_o_droite, coeff_temp, Integer.parseInt(Tvalue.getText()),moyenne);
-					//System.out.println("Copie vers sortie");
-					for (int k=0;k<reste;k++)
-						for (int l=0;l<32;l++)
-						{
-							erreur[(((donnee.length/32)-1)*32)+k][j*32+l]=erreur_i_droite[k][l];
-							x_rec[(((donnee.length/32)-1)*32)+k][j*32+l]=carre_o_droite[k][l];
-						}
-				}
-			}
-
-			//##########################debut transformee blocs du bas
-			if ((((donnee[0].length/32)-1)*32)!=donnee[0].length)
-			{
-				int reste = donnee[0].length-(((donnee[0].length/32)-1)*32);
-				double[][] carre_c_bas = new double[32][reste];
-				double[][] carre_nc_bas = new double[32][reste];
-				double[][] carre_o_bas = new double[32][reste];
-				double[][] erreur_i_bas = new double[32][reste];
-				for (int i=0;i<(donnee.length/32)-1;i++)
-				{
-					for (int k=0;k<32;k++)
-						for (int l=0;l<reste;l++)
-						{
-							carre_nc_bas[k][l]=donnee[i*32+k][(((donnee[0].length/32)-1)*32)+l];
-						}
-					//System.out.println("Moyenne");
-					moyenne = TraitImage.calculMoyenne(carre_nc_bas);
-					//System.out.println("Centrage");
-					carre_c_bas = TraitImage.centrageImage(carre_nc_bas,moyenne);
-					//System.out.println("Prediction");
-
-					double[][] coeff_temp = new double[coeff.length][coeff[0].length];
-					for (int k=0;k<coeff.length;k++)
-						for (int l=0;l<coeff[0].length;l++)
-							coeff_temp[k][l]=coeff[k][l];
-
-					TraitImage.getCoeff(carre_c_bas,coeff_temp);
-
-					TraitImage.predictionAR2d(carre_c_bas,erreur_i_bas, coeff_temp, Integer.parseInt(Tvalue.getText()));
-					//System.out.println("Restitution");
-					TraitImage.predictionAR2d_inv(erreur_i_bas,carre_o_bas, coeff_temp, Integer.parseInt(Tvalue.getText()),moyenne);
-					//System.out.println("Copie vers sortie");
-					for (int k=0;k<32;k++)
-						for (int l=0;l<reste;l++)
-						{
-							erreur[i*32+k][(((donnee[0].length/32)-1)*32)+l]=erreur_i_bas[k][l];
-							x_rec[i*32+k][(((donnee[0].length/32)-1)*32)+l]=carre_o_bas[k][l];
-						}
-				}
-			}
-
-			//##########################debut transformee blocs du bas a droite
-			if ((((donnee[0].length/32)-1)*32)!=donnee[0].length)
-				if ((((donnee.length/32)-1)*32)!=donnee.length)
-				{
-					int reste_x = donnee.length-(((donnee.length/32)-1)*32);
-					int reste_y = donnee[0].length-(((donnee[0].length/32)-1)*32);
-					double[][] carre_c_coin = new double[reste_x][reste_y];
-					double[][] carre_nc_coin = new double[reste_x][reste_y];
-					double[][] carre_o_coin = new double[reste_x][reste_y];
-					double[][] erreur_i_coin = new double[reste_x][reste_y];
-
-
-					for (int k=0;k<reste_x;k++)
-						for (int l=0;l<reste_y;l++)
-						{
-							carre_nc_coin[k][l]=donnee[(((donnee.length/32)-1)*32)+k][(((donnee[0].length/32)-1)*32)+l];
-						}
-					//System.out.println("Moyenne");
-					moyenne = TraitImage.calculMoyenne(carre_nc_coin);
-					//System.out.println("Centrage");
-					carre_c_coin = TraitImage.centrageImage(carre_nc_coin,moyenne);
-					//System.out.println("Prediction");
-
-					double[][] coeff_temp = new double[coeff.length][coeff[0].length];
-					for (int k=0;k<coeff.length;k++)
-						for (int l=0;l<coeff[0].length;l++)
-							coeff_temp[k][l]=coeff[k][l];
-
-					TraitImage.getCoeff(carre_c_coin,coeff_temp);
-
-					TraitImage.predictionAR2d(carre_c_coin,erreur_i_coin, coeff_temp, Integer.parseInt(Tvalue.getText()));
-					//System.out.println("Restitution");
-					TraitImage.predictionAR2d_inv(erreur_i_coin,carre_o_coin, coeff_temp, Integer.parseInt(Tvalue.getText()),moyenne);
-					//System.out.println("Copie vers sortie");
-					for (int k=0;k<reste_x;k++)
-						for (int l=0;l<reste_y;l++)
-						{
-							erreur[(((donnee.length/32)-1)*32)+k][(((donnee[0].length/32)-1)*32)+l]=erreur_i_coin[k][l];
-							x_rec[(((donnee.length/32)-1)*32)+k][(((donnee[0].length/32)-1)*32)+l]=carre_o_coin[k][l];
-						}
-				}
-
-			//Generer l'image d'erreur
-			for(int i=0;i<erreur.length;i++)
-				for(int j=0;j<erreur[0].length;j++)
-				{
-					 if (erreur[i][j]<0)
-                   System.out.println(erreur[i][j]+" ");
-					erreur[i][j]=Math.abs(erreur[i][j]);
-
-				}
-			erreurIm=TraitImage.setPixelTab(erreur);
-
-			//calcul des blocs
-			//System.out.println("Changement de format");
-			modifIm=TraitImage.setPixelTab(x_rec);
-		}
-		//###########################################################
-
-
-
-
-
-*/
-		//################### Methode globale #######################
-		//modifIm=TraitImage.setPixelTab(donnee);
-		if(ComboTransformee.getSelectedItem()=="Prediction globale")
-		{
-
-
-			//System.out.println("Debut transformee");
-			//System.out.println("Centrage de l'image");
-			//double moyenne = TraitImage.calculMoyenne(Iori);
-			double[][] donnee = TraitImage.centrageImage(Iori,0);
-			//System.out.println("Moyenne ="+moyenne);
-
-			//TraitImage.getCoeff(donnee,coeff);
-
-			//System.out.println("Reservation memoire y="+donnee.length+" x="+donnee[0].length);
-			double[][] erreur = new double[donnee.length][donnee[0].length];
-			//System.out.println("Calcul prediction");
+			// System.out.println("Reservation memoire y="+donnee.length+" x="+donnee[0].length);
+			erreur = new double[donnee.length][donnee[0].length];
+			// System.out.println("Calcul prediction");
 
 			/* MODIF TITUS */
-			//for(int i=0;i<coeff.length;i++)
-			//	for(int j=0;j<coeff[0].length;j++)
-			//		System.out.println("coeff "+coeff[i][j]);
-			//		coeff[0][0] = 0.0; 	coeff[0][1] = 0.5; 	coeff[1][0] = 0.5; 
+			// for(int i=0;i<coeff.length;i++)
+			// for(int j=0;j<coeff[0].length;j++)
+			// System.out.println("coeff "+coeff[i][j]);
+			// coeff[0][0] = 0.0; coeff[0][1] = 0.5; coeff[1][0] = 0.5;
 			/* FIN MODIF TITUS */
-			
-			//TraitImage.predictionAR2d(donnee,erreur, coeff, Integer.parseInt(Tvalue.getText()));
+
+			// TraitImage.predictionAR2d(donnee,erreur, coeff,
+			// Integer.parseInt(Tvalue.getText()));
 			/**
 			 * Transformee
 			 */
-			/*
-			Transform t = new Transform( new FastWaveletTransform( new Haar02( )) );
-			erreur = t.forward( donnee );
-			*/
-			int niv_resolution = 8;
-			int required_size = 1/valeur;
-			
 			TraitImage.haar2D_multi(donnee, erreur, niv_resolution);
-			CodageZTW ztw = new CodageZTW();
-			try {
-				ztw.ztw_code(erreur, erreur.length, erreur[0].length, niv_resolution, required_size, nomOri + ".bitstream");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			// System.out.println("Reservation memoire");
 			
-			//System.out.println("Reservation memoire");
-			/**
-			 * Transformee inverse
-			 */
-			double[][] x_rec = new double[donnee.length][donnee[0].length];
-			
-			try {
-				ztw.ztw_decode(erreur, 512, 512, niv_resolution, nomOri + ".bitstream");
-			} catch (Exception e){//IOException e) {
-				 //TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			TraitImage.haar2D_multi_inv(erreur,x_rec, niv_resolution);
 			/*
-			x_rec = t.reverse( erreur );
-			*/
-			
-			//System.out.println("Calcul restitution");
-			//TraitImage.predictionAR2d_inv(erreur,x_rec, coeff, Integer.parseInt(Tvalue.getText()),moyenne);
-			//System.out.println("Changement de format");
-			modifIm = TraitImage.setPixelTab(x_rec);
-			//System.out.println("Fin transformee");
-			//modifIm =TraitImage.applicMasque(modifIm,coeff,Fw*2-1,Fh*2-1);
+			 * CodageZTW ztw = new CodageZTW(); try { ztw.ztw_decode(erreur,
+			 * 512, 512, niv_resolution, nomOri + ".bitstream"); } catch
+			 * (Exception e){//IOException e) { //TODO Auto-generated catch
+			 * block e.printStackTrace(); }
+			 */
 
-			//System.out.println("end");
-
-
-			//Generer l'image d'erreur
-			for(int i=0;i<erreur.length;i++)
-				for(int j=0;j<erreur[0].length;j++)
-				{
-					/* if (erreur[i][j]<0)
-                   System.out.println(erreur[i][j]+" ");*/
-					erreur[i][j]=Math.abs(erreur[i][j]);
+			// Generer l'image d'erreur
+			double[][] erreurAbs = new double[erreur.length][erreur[0].length];
+			for (int i = 0; i < erreurAbs.length; i++)
+				for (int j = 0; j < erreurAbs[0].length; j++) {
+					/*
+					 * if (erreur[i][j]<0) System.out.println(erreur[i][j]+" ");
+					 */
+					erreurAbs[i][j] = Math.abs(erreur[i][j]);
 
 				}
-			erreurIm=TraitImage.setPixelTab(erreur);
+			erreurIm = TraitImage.setPixelTab(erreurAbs);
 		}
-		//#############################################################
+		// #############################################################
+		
+		erreurName.setText("E" + oriName.getText());
+	}
+	
+	/**
+	 * Transformee inverse
+	 * @param Ierreur
+	 * @param transformee
+	 * @param niv_resolution
+	 */
+	public void doTransInverse(double[][] err, String transformee,
+			int niv_resolution){
+		
+		modifName.setText("");
+		modifCadre.dispose();
 
+		double[][] x_rec = new double[err.length][err[0].length];
 
-
-
-		String nom="M"+oriName.getText();
-
+		if(transformee.equals("Transformee en ondelettes de Haar")){
+			TraitImage.haar2D_multi_inv(err, x_rec, niv_resolution);
+		}
+		
+		modifIm = TraitImage.setPixelTab(x_rec);
+		
+		String nom = "M" + oriName.getText();
 		modifName.setText(nom);
-		erreurName.setText("E"+oriName.getText());
 	}
-
-
-
-
-
-	//Initialise champs de la comboBox
-	public void initCombo(){
-		/* ComboTransformee.addItem("Aucun");
-    ComboTransformee.addItem("Moyenneur");*/
-		ComboTransformee.addItem("Prediction globale");
-		ComboTransformee.addItem("Prediction par blocs");
-
-		for(int i=1;i<=10;i++)
-		{
-			jComboH.addItem(i+"");
-			jComboW.addItem(i+"");
+	// Initialise champs de la comboBox
+	public void initCombo() {
+		/**
+		 * comboBox : choix de la transformee
+		 */
+		/*
+		 * jComboTransformee.addItem("Aucun");
+		 * jComboTransformee.addItem("Moyenneur");
+		 */
+		jComboTransformee.addItem("Transformee en ondelettes de Haar");
+		jComboTransformee.setSelectedIndex(0);
+		/**
+		 * comboBox : choix du nombre de niveaux de resolution de la transformee
+		 */
+		for (int i = 1; i <= 10; i++) {
+			jComboNivResolution.addItem(i + "");
 		}
-		jComboH.setSelectedIndex(3);
-		jComboW.setSelectedIndex(3);
+		jComboNivResolution.setSelectedIndex(3);
+		/**
+		 * comboBox : choix du taux de compression lors du codage
+		 */
+		for (int i = 1; i <= 5; i++) {
+			jComboTauxCompression.addItem(""+ i);
+		}
+		for (int i = 10; i <= 50; i += 10) {
+			jComboTauxCompression.addItem("" + i);
+		}
+		jComboTauxCompression.setSelectedIndex(2);
 	}
-
-
 
 	void jButton2_actionPerformed(ActionEvent e) {
 		System.exit(1);
@@ -824,93 +838,86 @@ public class menu extends JFrame {
 
 	void jButHisto_actionPerformed(ActionEvent e) {
 
-		//Affiche histo
-		if(this.oriName.getText().length()!=0)
-		{
+		// Affiche histo
+		if (this.oriName.getText().length() != 0) {
 			histoGraphOri.dispose();
-			histoGraphOri = new Histogramme(oriHisto,"originale",Color.blue,oriEntrop);
+			histoGraphOri = new Histogramme(oriHisto, "originale", Color.blue,
+					oriEntrop);
 
-			double delta= histoGraphOri.getSize().getWidth()/2;
+			double delta = histoGraphOri.getSize().getWidth() / 2;
 			this.oriHisto = TraitImage.calculHisto(bufIm);
-			this.oriEntrop = TraitImage.calculEntropie(this.oriHisto,bufIm.getHeight()*bufIm.getWidth());
-			this.histoGraphOri.valeurHisto=this.oriHisto;
-			this.histoGraphOri.entropie=this.oriEntrop;
+			this.oriEntrop = TraitImage.calculEntropie(this.oriHisto,
+					bufIm.getHeight() * bufIm.getWidth());
+			this.histoGraphOri.valeurHisto = this.oriHisto;
+			this.histoGraphOri.entropie = this.oriEntrop;
 
 			histoGraphOri.show();
-			histoGraphOri.setLocation((int)(histoGraphOri.getLocation().getX()-delta-60),(int)(histoGraphOri.getLocation().getY()-125));
+			histoGraphOri.setLocation((int) (histoGraphOri.getLocation().getX()
+					- delta - 60),
+					(int) (histoGraphOri.getLocation().getY() - 125));
 		}
 
-		if(this.modifName.getText().length()!=0)
-		{
+		if (this.modifName.getText().length() != 0) {
 			histoGraphModif.dispose();
-			histoGraphModif = new Histogramme(modifHisto,"modifiee",Color.red,modifEntrop);
+			histoGraphModif = new Histogramme(modifHisto, "modifiee",
+					Color.red, modifEntrop);
 
-			double delta= histoGraphModif.getSize().getWidth()/2;
-			this.modifHisto= TraitImage.calculHisto(modifIm);
-			this.modifEntrop = TraitImage.calculEntropie(this.modifHisto,modifIm.getHeight()*modifIm.getWidth());
-			histoGraphModif.valeurHisto=this.modifHisto;
-			this.histoGraphModif.entropie=this.modifEntrop;
+			double delta = histoGraphModif.getSize().getWidth() / 2;
+			this.modifHisto = TraitImage.calculHisto(modifIm);
+			this.modifEntrop = TraitImage.calculEntropie(this.modifHisto,
+					modifIm.getHeight() * modifIm.getWidth());
+			histoGraphModif.valeurHisto = this.modifHisto;
+			this.histoGraphModif.entropie = this.modifEntrop;
 
 			histoGraphModif.show();
-			histoGraphModif.setLocation((int)(histoGraphModif.getLocation().getX()+delta+60),(int)(histoGraphModif.getLocation().getY()-125));
+			histoGraphModif.setLocation((int) (histoGraphModif.getLocation()
+					.getX() + delta + 60), (int) (histoGraphModif.getLocation()
+					.getY() - 125));
 		}
 
-		if(this.erreurName.getText().length()!=0)
-		{
+		if (this.erreurName.getText().length() != 0) {
 			histoGraphErreur.dispose();
-			histoGraphErreur = new Histogramme(erreurHisto,"erreur",Color.green,erreurEntrop);
+			histoGraphErreur = new Histogramme(erreurHisto, "erreur",
+					Color.green, erreurEntrop);
 
-			double delta= histoGraphErreur.getSize().getWidth()/2;
-			this.erreurHisto= TraitImage.calculHisto(erreurIm);
-			this.erreurEntrop = TraitImage.calculEntropie(this.erreurHisto,erreurIm.getHeight()*erreurIm.getWidth());
-			histoGraphErreur.valeurHisto=this.erreurHisto;
-			this.histoGraphErreur.entropie=this.erreurEntrop;
+			double delta = histoGraphErreur.getSize().getWidth() / 2;
+			this.erreurHisto = TraitImage.calculHisto(erreurIm);
+			this.erreurEntrop = TraitImage.calculEntropie(this.erreurHisto,
+					erreurIm.getHeight() * erreurIm.getWidth());
+			histoGraphErreur.valeurHisto = this.erreurHisto;
+			this.histoGraphErreur.entropie = this.erreurEntrop;
 
 			histoGraphErreur.show();
-			histoGraphErreur.setLocation((int)(histoGraphErreur.getLocation().getX()),(int)(histoGraphErreur.getLocation().getY()+125));
+			histoGraphErreur.setLocation(
+					(int) (histoGraphErreur.getLocation().getX()),
+					(int) (histoGraphErreur.getLocation().getY() + 125));
 		}
-
-
-
-
 
 	}
 
 	void BAfficheOri_actionPerformed(ActionEvent e) {
-		if(this.oriName.getText().length()>0)
-		{
+		if (this.oriName.getText().length() > 0) {
 			oriCadre.setName("oriCadre");
-			afficherIm(bufIm,oriCadre,"Image originale : "+this.nomOri);
+			afficherIm(bufIm, oriCadre, "Image originale : " + this.nomOri);
 		}
 	}
 
 	void BAffichErreur_actionPerformed(ActionEvent e) {
-		if(this.erreurName.getText().length()>0)
-		{
+		if (this.erreurName.getText().length() > 0) {
 			erreurCadre.setName("erreurCadre");
-			afficherIm(erreurIm,erreurCadre,"Erreur prediction : "+this.erreurName.getText());
+			afficherIm(erreurIm, erreurCadre, "Erreur prediction : "
+					+ this.erreurName.getText());
 		}
 
 	}
 
 	void BAffichModif_actionPerformed(ActionEvent e) {
-		if(this.modifName.getText().length()>0)
-		{
+		if (this.modifName.getText().length() > 0) {
 			modifCadre.setName("modifCadre");
-			afficherIm(modifIm,modifCadre,"Image reconstituee : "+this.modifName.getText());
+			afficherIm(modifIm, modifCadre, "Image reconstituee : "
+					+ this.modifName.getText());
 		}
 	}
-
-//	void JButModifFen_actionPerformed(ActionEvent e) {
-//		this.jtoto.w=Integer.parseInt(jComboW.getSelectedItem().toString());
-//		this.jtoto.h=Integer.parseInt(jComboH.getSelectedItem().toString());
-//		this.parent.w=this.jtoto.w;
-//		this.parent.h=this.jtoto.h;
-//		this.parent.MAJ(this.jtoto.w,this.jtoto.h);
-//	}
-
-
-
 
 
 }

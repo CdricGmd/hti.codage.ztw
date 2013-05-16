@@ -238,17 +238,18 @@ public class CodageZTW {
 	public  int ztw_decode(double[][] xtrec, int width, int height,
 			int niv_resol, String bitstream_name) throws IOException {
 		/**
-		 * 
+		 * Initialisations
 		 */
 		int[][] etiquettes = new int[height][width];
 		double T = 0;
 		int MM = (int) (height / Math.pow(2, niv_resol - 1));
 		int NN = (int) (width / Math.pow(2, niv_resol - 1));
+		
 		assert (xtrec.length >= height && xtrec[0].length >= width);
 		for (int i = 0; i < height; i++)
 			for (int j = 0; j < width; j++)
 				xtrec[i][j] = 0;
-		etiquettes = new int[height][width];
+		
 		/**
 		 * Ouverture du fichier
 		 */
@@ -435,7 +436,12 @@ public class CodageZTW {
 		int NN = (int) (width / Math.pow(2, niv_resol - 1));
 		for (int i = 0; i<MM; i++) {
 			for (int j = NN; j<width; j++) {
-				
+				if (estEgal(etiquettes, P, i, j)){
+					donnee[i][j] -= seuil;
+				}
+				else if (estEgal(etiquettes, N, i, j)){
+					donnee[i][j] += seuil;
+				}
 			}
 		}
 		for (int i = MM; i<height; i++) {

@@ -586,22 +586,26 @@ public static double[] getV(double[][] r){
 	{
 		int h = x.length;
 		int w = x[0].length; 
-		int W2 = w>>1;
-		int N2 = h>>1; 
+		int W2 = w/2;
+		int H2 = h/2; 
 		double [][]z = new double[h][w]; 
 		//Lignes
 		for(int i=0; i<h; i++)
-			for(int j=0;j<N2;j++)
+			for(int j=0;j<H2;j++)
 			{
-				z[i][j] = (x[i][2*j]+x[i][2*j+1])/2;
-				z[i][j+N2] = (x[i][2*j]-x[i][2*j+1])/2;
+				if((2*j+1 < w)&&(j+H2 < w)){
+					z[i][j] = (x[i][2*j]+x[i][2*j+1])/2;
+					z[i][j+H2] = (x[i][2*j]-x[i][2*j+1])/2;
+				}
 			}
 		//Colonnes
 		for(int j=0; j<w;j++)
 			for(int i=0;i<W2;i++)
-			{
-				y[i][j] = (z[2*i][j]+z[2*i+1][j])/2;
-				y[i+W2][j] = (z[2*i][j]-z[2*i+1][j])/2;
+			{	
+				if((2*i+1 < h)&&(i+W2 < h)){
+					y[i][j] = (z[2*i][j]+z[2*i+1][j])/2;
+					y[i+W2][j] = (z[2*i][j]-z[2*i+1][j])/2;
+				}
 			}
 	}
 	/**
@@ -614,22 +618,25 @@ public static double[] getV(double[][] r){
 		int h = x.length;
 		int w = x[0].length; 
 		int W2 = w>>1;
-		int N2 = h>>1; 
+		int H2 = h>>1; 
 		double [][]z = new double[h][w]; 
 		//Lignes
 		for(int i=0; i<h; i++)
-			for(int j=0;j<N2;j++)
+			for(int j=0;j<H2;j++)
 			{
-				z[i][2*j] = x[i][j] + x[i][j+N2];
-				z[i][2*j+1] = x[i][j] - x[i][j+N2];
+				if(((2*j+1) < w) && ((j+H2) < w)){
+					z[i][2*j] = x[i][j] + x[i][j+H2];
+					z[i][2*j+1] = x[i][j] - x[i][j+H2];
+				}
 			}
 		//Colonnes
 		for(int j=0; j<w;j++)
 			for(int i=0;i<W2;i++)
 			{
-				x_rec[2*i][j] = z[i][j] + z[i+N2][j];
-				x_rec[2*i+1][j] = z[i][j] - z[i+N2][j];
-
+				if(((2*i+1) < h) && ((i+W2) < h)){
+					x_rec[2*i][j] = z[i][j] + z[i+H2][j];
+					x_rec[2*i+1][j] = z[i][j] - z[i+H2][j];
+				}
 			}
 	}
 	/**
