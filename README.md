@@ -1,9 +1,21 @@
-Module ***3D video and graphic compression*** de Télécom SudParis, voie d'approfondissement *High Tech Imaging*. 
 
-jeudi 16 mai 2013.
+This repository represents a project in Telecom SudParis 'High Tech Imaging' for the lecture ***Image, video and 3D graphics compression***.
+
+The project is pubished under The MIT License (MIT)
+> Copyright (c) 2013 Cédric Golmard, Institut Mines – Telecom ; Telecom SudParis as part of HighTech Imaging major
+
+The subject was proposed by Titus Zaharia, researcher at Institut Mines – Telecom ; ARTEMIS.
+
+As the related lecture was in french, the entire project description and a part of the source comments are also in french.
+
+----
+
+Module ***Image, video and 3D graphics compression*** de Télécom SudParis, voie d'approfondissement *High Tech Imaging*. 
+
 # hti.codage.ztw
 
 ## Qu'est-ce que c'est ?
+
 Ce programme Java a pour objectif de d'implémenter une *méthode de codage ZTW* d'images transformée en ondelettes. Ce codage est avec perte (*lossy*) mais permet un codage et décodage progressifs de l'image. Par exemple, si le codage s'arrête à un instant quelcoque, on pourra décoder l'image avec le fichier binaire déjà écrit mais avec une qualité moindre.
 
 ![Capture d'écran du programme](http://img15.hostingpics.net/pics/288110Screenshot.png "Capture d'écran du programme")
@@ -53,9 +65,9 @@ Autres actions possibles :
 
 ## Implémentation
 
-L'implémentation utilise en partie du code Java fourni en début de module  qui a été modifié pour personnaliser l'interface graphique et les traitements d'image. 
+L'implémentation utilise en partie du code Java fourni en début de module qui a été modifié pour personnaliser l'interface graphique et les traitements d'image. Il reste néanmoins dans le code source des parties "fantômes" inutilisées du code initial qui peuvent en complexifier (inutilement) la lecture.
 
-Un transformée de Haar 2D multiréolution est implémentée dans la classe *TraitImage*.
+Une transformée de Haar 2D multiréolution est implémentée dans la classe *TraitImage*.
 
 A cela se rajoute un *package "Compression"* contenant la classe "*CodageZTW.java*". Le critère d'arrêt implémenté pour ce codage est la taille de fichier binaire voulue. La taille est vérifiée après chaque itération de l'algorithme (un parcours de l'image).
 
@@ -114,7 +126,7 @@ Un buffer de type *int* (32bits) permet de lire et écrire 16 étiquettes (16\*2
 	// Le processus de lecture est équivalent mais inversé.
 
 ## Limitations
-* Une seule transformée est disponible : la transformée de Haar 2D multirésolution. 
->D'autres transformées peuvent être implémentées. Il faut alors dans *menu.java* mettre à jour le champ de la liste déroulante *jComboTransformee* et appeler les transformées directe et inverse dans la méthode *doTransformee()* et *doTransInverse()* dans un bloc conditionel sur le type de transformée demandée.
-	
-* La methode *decodeZTW* de *CodageZTW* ne donne pas de résultat satisfaisant. Le décodage échoue ou donne en résultat une image transformee non conforme à ce qui a été codé. On peut présupposer que le problème résulte soit du parcours de l'image soit de la lecture du fichier binaire.
+
+- Une seule transformée est disponible : la transformée de Haar 2D multirésolution. 
+	- D'autres transformées peuvent être implémentées. Il faut alors dans *menu.java* mettre à jour le champ de la liste déroulante *jComboTransformee* et appeler les transformées directe et inverse dans la méthode *doTransformee()* et *doTransInverse()* dans un bloc conditionel sur le type de transformée demandée.
+- La methode *decodeZTW* de *CodageZTW* ne donne pas de résultat satisfaisant. Le décodage échoue ou donne en résultat une image transformee non conforme à ce qui a été codé. On peut présupposer que le problème résulte soit du parcours de l'image soit de la lecture du fichier binaire.
